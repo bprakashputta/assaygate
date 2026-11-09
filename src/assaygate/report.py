@@ -212,13 +212,14 @@ def forest(
     cls_key: str = "cls",
 ) -> str:
     """Dot-and-whisker rows sharing one x-axis. rows: name, est, lo, hi, cls, tip, val."""
-    vals = [r["lo"] for r in rows] + [r["hi"] for r in rows] + [ref] + (limits or [])
+    row_limits = [x for r in rows for x in r.get("limits", [])]
+    vals = [r["lo"] for r in rows] + [r["hi"] for r in rows] + [ref] + (limits or []) + row_limits
     lo, hi = _scale(min(vals), max(vals))
     out = ["<div class='forest' role='img' aria-label='estimates with confidence intervals'>"]
     for r in rows:
         left, right = _pct(r["lo"], lo, hi), _pct(r["hi"], lo, hi)
         lines = f"<div class='vline' style='left:{_pct(ref, lo, hi):.2f}%'></div>"
-        for lim in limits or []:
+        for lim in r.get("limits", limits) or []:
             lines += f"<div class='vline limit' style='left:{_pct(lim, lo, hi):.2f}%'></div>"
         out.append(
             f"<div class='row'><div class='name'>{e(r['name'])}</div>"
@@ -379,15 +380,21 @@ def render_compare_html(result: GateResult, baseline: Run, candidate: Run) -> st
         }
         for c in rc
     ]
-    lims = []
-    for key, sub in (("cost", "max_increase"), ("latency", "p95_max_increase")):
+    for row, (key, sub) in zip(
+        rrows,
+        [
+            ("cost", "max_increase") if c.kind == "cost" else ("latency", "p95_max_increase")
+            for c in rc
+        ],
+        strict=True,
+    ):
         g = cm.gate.get(key) or {}
-        if g.get(sub) is not None:
-            lims.append(1 + g[sub])
+        row["limits"] = [1 + g[sub]] if g.get(sub) is not None else []
+    lims: list[float] = []
     ops = (
         "<section><span class='label'>Cost and latency</span><h2>What the candidate costs to run</h2>"
-        "<p class='lede'>Ratios candidate ÷ baseline with paired bootstrap CIs (orange lines = "
-        "allowed increase). Below: the full per-item distributions as cumulative curves; hover "
+        "<p class='lede'>Ratios candidate ÷ baseline with paired bootstrap CIs (orange line = "
+        "that row's allowed increase). Below: the full per-item distributions as cumulative curves; hover "
         "to read the share of items at or below a value.</p>"
         + (forest(rrows, ref=1.0, limits=lims, tick_fmt="x{:.2f}") if rrows else "")
         + "<div style='height:22px'></div>"

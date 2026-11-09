@@ -11,6 +11,7 @@
     "q107-t1-llama-13b-vs-vicuna-13b-v1.2",
     "q128-t1-alpaca-13b-vs-llama-13b"
   ],
+  "final_variant": "6 +few-shot",
   "human_human": {
     "with_tie": 0.6421961752004935,
     "without_tie": 0.806390977443609,
@@ -640,6 +641,354 @@
       "cost_per_item_usd": 0.0004168376666666667,
       "latency_ms_p50": 790.1828330068383,
       "latency_ms_p95": 4111.658853838161
+    }
+  ],
+  "subsets": [
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "1 naive",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.5576923076923077,
+        "low": 0.42339761776813706,
+        "high": 0.6840494318979606,
+        "level": 0.95
+      },
+      "kappa": 0.33147009502515373,
+      "vs_first": null
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "2 +rubric",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.5384615384615384,
+        "low": 0.4050361131673833,
+        "high": 0.6665952532766818,
+        "level": 0.95
+      },
+      "kappa": 0.30512249443207123,
+      "vs_first": {
+        "delta": -0.019230769230769232,
+        "low": -0.09615384615384616,
+        "high": 0.057692307692307696,
+        "mcnemar_p": 1.0,
+        "lost": 3,
+        "gained": 2
+      }
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "3 +cot",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.75,
+        "low": 0.6179354204600347,
+        "high": 0.8476684614263885,
+        "level": 0.95
+      },
+      "kappa": 0.6223463687150839,
+      "vs_first": {
+        "delta": 0.19230769230769232,
+        "low": 0.07692307692307693,
+        "high": 0.3076923076923077,
+        "mcnemar_p": 0.00634765625,
+        "lost": 1,
+        "gained": 11
+      }
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "4 +reference",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.7692307692307693,
+        "low": 0.6386621743047746,
+        "high": 0.8627573908036813,
+        "level": 0.95
+      },
+      "kappa": 0.6521739130434783,
+      "vs_first": {
+        "delta": 0.21153846153846154,
+        "low": 0.09615384615384616,
+        "high": 0.34615384615384615,
+        "mcnemar_p": 0.00341796875,
+        "lost": 1,
+        "gained": 12
+      }
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "5 +swap",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.8269230769230769,
+        "low": 0.7026913586413089,
+        "high": 0.9061752561332445,
+        "level": 0.95
+      },
+      "kappa": 0.7378151260504201,
+      "vs_first": {
+        "delta": 0.2692307692307692,
+        "low": 0.15384615384615385,
+        "high": 0.40384615384615385,
+        "mcnemar_p": 0.0001220703125,
+        "lost": 0,
+        "gained": 14
+      }
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "6 +few-shot",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.8269230769230769,
+        "low": 0.7026913586413089,
+        "high": 0.9061752561332445,
+        "level": 0.95
+      },
+      "kappa": 0.7381085618354783,
+      "vs_first": {
+        "delta": 0.2692307692307692,
+        "low": 0.15384615384615385,
+        "high": 0.38461538461538464,
+        "mcnemar_p": 0.0001220703125,
+        "lost": 0,
+        "gained": 14
+      }
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "6a average swap",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.75,
+        "low": 0.6179354204600347,
+        "high": 0.8476684614263885,
+        "level": 0.95
+      },
+      "kappa": 0.628775398132894,
+      "vs_first": {
+        "delta": 0.19230769230769232,
+        "low": 0.09615384615384616,
+        "high": 0.3076923076923077,
+        "mcnemar_p": 0.001953125,
+        "lost": 0,
+        "gained": 10
+      }
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "6b no swap",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.7884615384615384,
+        "low": 0.6596789536006595,
+        "high": 0.8775562947298288,
+        "level": 0.95
+      },
+      "kappa": 0.6827509706045479,
+      "vs_first": {
+        "delta": 0.23076923076923078,
+        "low": 0.11538461538461539,
+        "high": 0.34615384615384615,
+        "mcnemar_p": 0.00048828125,
+        "lost": 0,
+        "gained": 12
+      }
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "6c thinking, no CoT field",
+      "n": 52,
+      "agreement": {
+        "estimate": 0.7692307692307693,
+        "low": 0.6386621743047746,
+        "high": 0.8627573908036813,
+        "level": 0.95
+      },
+      "kappa": 0.6496350364963505,
+      "vs_first": {
+        "delta": 0.21153846153846154,
+        "low": 0.07692307692307693,
+        "high": 0.34615384615384615,
+        "mcnemar_p": 0.012725830078125,
+        "lost": 3,
+        "gained": 14
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "1 naive",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.7647058823529411,
+        "low": 0.651448320181797,
+        "high": 0.8496550898526084,
+        "level": 0.95
+      },
+      "kappa": 0.5903614457831324,
+      "vs_first": null
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "2 +rubric",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.75,
+        "low": 0.6356144713466476,
+        "high": 0.8376498603525131,
+        "level": 0.95
+      },
+      "kappa": 0.563114134542706,
+      "vs_first": {
+        "delta": -0.014705882352941176,
+        "low": -0.058823529411764705,
+        "high": 0.029411764705882353,
+        "mcnemar_p": 1.0,
+        "lost": 2,
+        "gained": 1
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "3 +cot",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.7352941176470589,
+        "low": 0.6199226600022928,
+        "high": 0.8255025933616232,
+        "level": 0.95
+      },
+      "kappa": 0.5389830508474577,
+      "vs_first": {
+        "delta": -0.029411764705882353,
+        "low": -0.11764705882352941,
+        "high": 0.04411764705882353,
+        "mcnemar_p": 0.7265625,
+        "lost": 5,
+        "gained": 3
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "4 +reference",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.7205882352941176,
+        "low": 0.6043656542039689,
+        "high": 0.8132205208247022,
+        "level": 0.95
+      },
+      "kappa": 0.5128205128205129,
+      "vs_first": {
+        "delta": -0.04411764705882353,
+        "low": -0.11764705882352941,
+        "high": 0.029411764705882353,
+        "mcnemar_p": 0.453125,
+        "lost": 5,
+        "gained": 2
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "5 +swap",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.7352941176470589,
+        "low": 0.6199226600022928,
+        "high": 0.8255025933616232,
+        "level": 0.95
+      },
+      "kappa": 0.5614475098530993,
+      "vs_first": {
+        "delta": -0.029411764705882353,
+        "low": -0.1323529411764706,
+        "high": 0.07352941176470588,
+        "mcnemar_p": 0.7744140625,
+        "lost": 7,
+        "gained": 5
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "6 +few-shot",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.7647058823529411,
+        "low": 0.651448320181797,
+        "high": 0.8496550898526084,
+        "level": 0.95
+      },
+      "kappa": 0.6128113879003558,
+      "vs_first": {
+        "delta": 0.0,
+        "low": -0.08823529411764706,
+        "high": 0.08823529411764706,
+        "mcnemar_p": 1.0,
+        "lost": 5,
+        "gained": 5
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "6a average swap",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.75,
+        "low": 0.6356144713466476,
+        "high": 0.8376498603525131,
+        "level": 0.95
+      },
+      "kappa": 0.5853658536585366,
+      "vs_first": {
+        "delta": -0.014705882352941176,
+        "low": -0.10294117647058823,
+        "high": 0.07352941176470588,
+        "mcnemar_p": 1.0,
+        "lost": 5,
+        "gained": 4
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "6b no swap",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.7647058823529411,
+        "low": 0.651448320181797,
+        "high": 0.8496550898526084,
+        "level": 0.95
+      },
+      "kappa": 0.5926619243728939,
+      "vs_first": {
+        "delta": 0.0,
+        "low": -0.08823529411764706,
+        "high": 0.07352941176470588,
+        "mcnemar_p": 1.0,
+        "lost": 4,
+        "gained": 4
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "6c thinking, no CoT field",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.7647058823529411,
+        "low": 0.651448320181797,
+        "high": 0.8496550898526084,
+        "level": 0.95
+      },
+      "kappa": 0.6084922634041021,
+      "vs_first": {
+        "delta": 0.0,
+        "low": -0.08823529411764706,
+        "high": 0.08823529411764706,
+        "mcnemar_p": 1.0,
+        "lost": 5,
+        "gained": 5
+      }
     }
   ]
 }

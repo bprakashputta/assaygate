@@ -145,3 +145,13 @@ async def test_rate_limit_backoff_then_success(make_llm, monkeypatch):
     llm, _ = make_llm(responder)
     res = await llm.complete([{"role": "user", "content": "x"}], output_model=Out)
     assert res.parsed.winner == "tie" and calls["n"] == 3
+
+
+async def test_thinking_off_maps_per_model(make_llm):
+    llm, sdk = make_llm(lambda r: {"winner": "A"})
+    await llm.complete(
+        [{"role": "user", "content": "x"}],
+        output_model=Out,
+        settings=LLMSettings(model="claude-sonnet-5-5"),
+    )
+    assert sdk.messages.requests[-1]["thinking"] == {"type": "between_tools"}

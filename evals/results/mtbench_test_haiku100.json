@@ -1,0 +1,225 @@
+{
+  "dataset": "lmsys/mt_bench_human_judgments (human split), CC BY 4.0",
+  "split": "test",
+  "n": 100,
+  "judge_model": "claude-haiku-5-5",
+  "few_shot_ids": [
+    "q106-t1-gpt-4-vs-llama-13b",
+    "q98-t1-claude-v1-vs-llama-13b",
+    "q112-t1-alpaca-13b-vs-gpt-3.5-turbo",
+    "q98-t1-alpaca-13b-vs-claude-v1",
+    "q107-t1-llama-13b-vs-vicuna-13b-v1.2",
+    "q128-t1-alpaca-13b-vs-llama-13b"
+  ],
+  "final_variant": "6 +few-shot",
+  "human_human": {
+    "with_tie": 0.6421961752004935,
+    "without_tie": 0.806390977443609,
+    "vote_pairs": 1621
+  },
+  "spend_this_run_usd": 0.0,
+  "llm_calls": 400,
+  "cache_hits": 400,
+  "variants": [
+    {
+      "name": "1 naive",
+      "prompt_files": [
+        "pairwise_naive"
+      ],
+      "n": 100,
+      "agreement": {
+        "estimate": 0.73,
+        "low": 0.6356788322400596,
+        "high": 0.8073041585583035,
+        "level": 0.95
+      },
+      "kappa": {
+        "estimate": 0.5485704731650225,
+        "low": 0.40858357592122174,
+        "high": 0.6875637235984177,
+        "level": 0.95
+      },
+      "non_tie_agreement": 0.8518518518518519,
+      "non_tie_n": 81,
+      "judge_tie_rate": 0.04,
+      "human_tie_rate": 0.19,
+      "confusion": [
+        [
+          41,
+          2,
+          0
+        ],
+        [
+          10,
+          28,
+          0
+        ],
+        [
+          8,
+          7,
+          4
+        ]
+      ],
+      "consistency": 0.89,
+      "first_position_rate": 0.6363636363636364,
+      "verbosity_judge_longer": 0.6470588235294118,
+      "verbosity_human_longer": 0.7058823529411765,
+      "verbosity_n": 51,
+      "n_invalid": 0,
+      "vs_first": null,
+      "by_category": {
+        "coding": 0.5555555555555556,
+        "extraction": 0.8333333333333334,
+        "humanities": 0.6153846153846154,
+        "math": 0.7,
+        "reasoning": 0.7692307692307693,
+        "roleplay": 0.7857142857142857,
+        "stem": 0.9090909090909091,
+        "writing": 0.5833333333333334
+      },
+      "cost_usd": 0.0274311,
+      "cost_per_item_usd": 0.000274311,
+      "latency_ms_p50": 777.3192500026198,
+      "latency_ms_p95": 1357.9406125034438
+    },
+    {
+      "name": "6 +few-shot",
+      "prompt_files": [
+        "pairwise_rubric",
+        "pairwise_reference",
+        "pairwise_cot",
+        "pairwise_fewshot"
+      ],
+      "n": 100,
+      "agreement": {
+        "estimate": 0.69,
+        "low": 0.5937394427244838,
+        "high": 0.7722030279350336,
+        "level": 0.95
+      },
+      "kappa": {
+        "estimate": 0.5047132129733184,
+        "low": 0.36994975329642193,
+        "high": 0.6394308093154915,
+        "level": 0.95
+      },
+      "non_tie_agreement": 0.8873239436619719,
+      "non_tie_n": 71,
+      "judge_tie_rate": 0.16,
+      "human_tie_rate": 0.19,
+      "confusion": [
+        [
+          37,
+          2,
+          4
+        ],
+        [
+          6,
+          26,
+          6
+        ],
+        [
+          6,
+          7,
+          6
+        ]
+      ],
+      "consistency": 0.88,
+      "first_position_rate": 0.5833333333333334,
+      "verbosity_judge_longer": 0.6666666666666666,
+      "verbosity_human_longer": 0.7058823529411765,
+      "verbosity_n": 45,
+      "n_invalid": 0,
+      "vs_first": {
+        "delta": -0.04,
+        "low": -0.1,
+        "high": 0.02,
+        "mcnemar_p": 0.34375,
+        "lost": 7,
+        "gained": 3
+      },
+      "by_category": {
+        "coding": 0.5555555555555556,
+        "extraction": 0.8333333333333334,
+        "humanities": 0.5384615384615384,
+        "math": 0.9,
+        "reasoning": 0.7692307692307693,
+        "roleplay": 0.5714285714285714,
+        "stem": 0.9090909090909091,
+        "writing": 0.4166666666666667
+      },
+      "cost_usd": 0.05331666,
+      "cost_per_item_usd": 0.0005331666,
+      "latency_ms_p50": 1877.440750497044,
+      "latency_ms_p95": 3104.428664234001
+    }
+  ],
+  "subsets": [
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "1 naive",
+      "n": 32,
+      "agreement": {
+        "estimate": 0.6875,
+        "low": 0.5143332168494361,
+        "high": 0.8204745837470517,
+        "level": 0.95
+      },
+      "kappa": 0.5259259259259259,
+      "vs_first": null
+    },
+    {
+      "subset": "math, reasoning, coding",
+      "variant": "6 +few-shot",
+      "n": 32,
+      "agreement": {
+        "estimate": 0.75,
+        "low": 0.5789344099115531,
+        "high": 0.867475990883764,
+        "level": 0.95
+      },
+      "kappa": 0.621861152141802,
+      "vs_first": {
+        "delta": 0.0625,
+        "low": 0.0,
+        "high": 0.15625,
+        "mcnemar_p": 0.5,
+        "lost": 0,
+        "gained": 2
+      }
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "1 naive",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.75,
+        "low": 0.6356144713466476,
+        "high": 0.8376498603525131,
+        "level": 0.95
+      },
+      "kappa": 0.5555555555555556,
+      "vs_first": null
+    },
+    {
+      "subset": "writing, roleplay, extraction, stem, humanities",
+      "variant": "6 +few-shot",
+      "n": 68,
+      "agreement": {
+        "estimate": 0.6617647058823529,
+        "low": 0.5433723937691829,
+        "high": 0.7628574679185093,
+        "level": 0.95
+      },
+      "kappa": 0.4436143721095695,
+      "vs_first": {
+        "delta": -0.08823529411764706,
+        "low": -0.17647058823529413,
+        "high": -0.014705882352941176,
+        "mcnemar_p": 0.0703125,
+        "lost": 7,
+        "gained": 1
+      }
+    }
+  ]
+}

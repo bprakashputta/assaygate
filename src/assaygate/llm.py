@@ -74,6 +74,10 @@ def cost_usd(model: str, usage: Usage) -> float:
     )
 
 
+# Models that reject {"type": "disabled"}; "between_tools" is their thinking-off mode.
+THINKING_OFF_AS_BETWEEN_TOOLS = {"claude-sonnet-5-5"}
+
+
 def estimate_tokens(text: str) -> int:
     """Conservative prompt-size estimate used only for spend reservations (~3 chars/token)."""
     return len(text) // 3 + 16
@@ -279,7 +283,10 @@ class LLMClient:
         if output_config:
             req["output_config"] = output_config
         if settings.thinking:
-            req["thinking"] = {"type": settings.thinking}
+            thinking = settings.thinking
+            if thinking == "disabled" and settings.model in THINKING_OFF_AS_BETWEEN_TOOLS:
+                thinking = "between_tools"
+            req["thinking"] = {"type": thinking}
         req.update(settings.extra)
         return req
 

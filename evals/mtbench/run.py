@@ -27,7 +27,14 @@ import logging
 import os
 from pathlib import Path
 
-from assaygate.calibrate import CalibrationConfig, VariantSpec, calibrate, load_cases
+from assaygate.calibrate import (
+    CalibrationConfig,
+    VariantSpec,
+    calibrate,
+    load_cases,
+    paired_vs,
+    summarise,
+)
 from assaygate.llm import LLMClient, RateLimiter, ResponseCache, SpendLedger
 from assaygate.report import render_calibration_html
 
@@ -126,6 +133,34 @@ async def main() -> None:
     result = await calibrate(cfg, llm, cases=cases)
     spent = llm.ledger.spent_usd - before
 
+    # Subsets: where reference answers exist (math/reasoning/coding) vs open-ended categories.
+    subsets = {
+        "math, reasoning, coding": {"math", "reasoning", "coding"},
+        "writing, roleplay, extraction, stem, humanities": {
+            "writing",
+            "roleplay",
+            "extraction",
+            "stem",
+            "humanities",
+        },
+    }
+    first_name = result.variants[0].name
+    subset_rows = []
+    for label, cats in subsets.items():
+        base_items = [i for i in result.items[first_name] if i.category in cats]
+        for v in result.variants:
+            items = [i for i in result.items[v.name] if i.category in cats]
+            m = summarise(v.name, [], items, [0.0] * len(items), [])
+            subset_rows.append(
+                {
+                    "subset": label,
+                    "variant": v.name,
+                    "n": len(items),
+                    "agreement": m.agreement,
+                    "kappa": m.kappa["estimate"],
+                    "vs_first": paired_vs(base_items, items) if v.name != first_name else None,
+                }
+            )
     summary = json.loads((DATA / "summary.json").read_text())
     stem = f"mtbench_{args.split}{('_' + args.tag) if args.tag else ''}"
     RESULTS.mkdir(parents=True, exist_ok=True)
@@ -145,10 +180,15 @@ async def main() -> None:
         "llm_calls": llm.calls,
         "cache_hits": llm.cache_hits,
         "variants": [v.model_dump() for v in result.variants],
+        "subsets": subset_rows,
     }
     (RESULTS / f"{stem}.json").write_text(json.dumps(payload, indent=2) + "\n")
     (RESULTS / f"{stem}.md").write_text(markdown(payload))
     (RESULTS / f"{stem}.html").write_text(render_calibration_html(result, payload))
+    with (RESULTS / f"{stem}_items.jsonl").open("w") as fh:
+        for name, items in result.items.items():
+            for it in items:
+                fh.write(json.dumps({"variant": name, **it.model_dump()}) + "\n")
     print(markdown(payload))
     print(f"spend this run ${spent:.4f} · ledger total ${llm.ledger.spent_usd:.4f}")
 
@@ -186,6 +226,25 @@ def markdown(p: dict) -> str:
             f"| {pct(v['verbosity_judge_longer'])} / {pct(v['verbosity_human_longer'])} "
             f"| {delta} | ${v['cost_per_item_usd']:.5f} |"
         )
+    if p.get("subsets"):
+        lines += [
+            "",
+            "By category group (paired Δ agreement vs naive, 95% bootstrap CI):",
+            "",
+            "| subset | variant | N | agreement | kappa | Δ vs naive |",
+            "|---|---|---|---|---|---|",
+        ]
+        for r in p["subsets"]:
+            d = r["vs_first"]
+            dt = (
+                f"{100 * d['delta']:+.1f} [{100 * d['low']:+.1f}, {100 * d['high']:+.1f}]"
+                if d
+                else "–"
+            )
+            lines.append(
+                f"| {r['subset']} | {r['variant']} | {r['n']} | {pct(r['agreement']['estimate'])} "
+                f"| {r['kappa']:.3f} | {dt} |"
+            )
     lines += [
         "",
         f"Human tie rate: {pct(p['variants'][0]['human_tie_rate'])}. "

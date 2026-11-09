@@ -1,0 +1,175 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Judge calibration report</title><meta name='description' content='judge calibration'><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"><style>
+:root{--paper:#f5f2eb;--paper-2:#ece7dc;--card:#fbf9f4;--ink:#17160f;--ink-2:#4a463c;--ink-3:#6f695d;
+--rule:#d9d2c3;--grid:#e4ddcf;--signal:#c8431a;--signal-ink:#a5360f;--signal-wash:#f4dccf;
+--base:#3b5bdb;--cand:#c8431a;--seq:59,91,219;color-scheme:light;
+--serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
+--sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+--mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#12110d;--paper-2:#1b1a15;
+--card:#181712;--ink:#ede7da;--ink-2:#bdb6a6;--ink-3:#8b8576;--rule:#2f2d25;--grid:#26241d;
+--signal:#ff7a4a;--signal-ink:#ff9a72;--signal-wash:#3a1f14;--base:#6f8cf0;--cand:#e8602f;
+--seq:111,140,240;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#12110d;--paper-2:#1b1a15;--card:#181712;--ink:#ede7da;--ink-2:#bdb6a6;
+--ink-3:#8b8576;--rule:#2f2d25;--grid:#26241d;--signal:#ff7a4a;--signal-ink:#ff9a72;--signal-wash:#3a1f14;
+--base:#6f8cf0;--cand:#e8602f;--seq:111,140,240;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.55 var(--sans);
+-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.mono,.label,code,td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+code{font-size:.86em;background:var(--paper-2);padding:1px 5px;border-radius:3px}
+header.top{border-bottom:1px solid var(--rule)}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;height:52px;gap:12px}
+.brand{font-family:var(--mono);font-size:13px;color:var(--ink-2)}.brand b{color:var(--ink);font-weight:500}
+.hero{padding:40px 0 28px;border-bottom:1px solid var(--rule)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5.4vw,60px);line-height:1;
+letter-spacing:-.015em;margin:14px 0 18px;max-width:28ch}
+h1 em{font-style:italic;color:var(--signal)}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3vw,34px);line-height:1.05;margin:0 0 6px}
+h3{font-size:15px;font-weight:500;margin:0 0 10px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 22px;color:var(--ink-2);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:999px;
+padding:4px 12px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.pill.fail{border-color:var(--signal);color:var(--signal-ink);background:var(--signal-wash)}
+.pill.pass{color:var(--ink)}
+.pill i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+section{padding:34px 0;border-bottom:1px solid var(--rule)}
+.lede{color:var(--ink-2);max-width:72ch;margin:0 0 22px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:1px solid var(--rule);
+border-left:1px solid var(--rule);margin-top:26px}
+.tile{padding:16px 18px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);min-width:0}
+.tile .v{font-size:28px;font-weight:500;letter-spacing:-.01em;margin:6px 0 2px}
+.tile .d{font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
+.tile.fail .d b{color:var(--signal-ink)}
+.status{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+.status.fail{color:var(--signal-ink)}.status.pass{color:var(--ink-3)}
+.forest{display:grid;grid-template-columns:minmax(110px,180px) 1fr minmax(120px,170px);gap:0 14px;align-items:center}
+.forest .row{display:contents}
+.forest .name{font-size:13.5px;padding:10px 0;border-top:1px solid var(--rule);overflow-wrap:anywhere}
+.forest .val{font-family:var(--mono);font-size:12px;color:var(--ink-2);text-align:right;padding:10px 0;
+border-top:1px solid var(--rule)}
+.forest .plot{position:relative;height:40px;border-top:1px solid var(--rule)}
+.forest .axis{position:relative;height:22px}
+.forest .axis span{position:absolute;top:4px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.vline{position:absolute;top:0;bottom:0;width:1px;background:var(--ink-3)}
+.vline.limit{background:var(--signal);opacity:.55}
+.whisker{position:absolute;top:50%;height:2px;margin-top:-1px;border-radius:1px}
+.dot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;
+box-shadow:0 0 0 2px var(--paper)}
+.ok .whisker,.ok .dot{background:var(--ink)}.bad .whisker,.bad .dot{background:var(--signal)}
+.b .whisker,.b .dot{background:var(--base)}.c .whisker,.c .dot{background:var(--cand)}
+.hit{position:absolute;inset:0;cursor:default}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--ink-2);margin:0 0 12px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.key{width:10px;height:10px;border-radius:50%;display:inline-block}.key.b{background:var(--base)}
+.key.c{background:var(--cand)}.key.line{width:16px;height:2px;border-radius:1px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:28px}
+.ecdf{position:relative}
+.ecdf svg{display:block;width:100%;height:190px;overflow:visible}
+.ecdf .gl{stroke:var(--grid);stroke-width:1;vector-effect:non-scaling-stroke}
+.ecdf .ln{fill:none;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.ecdf .ln.b{stroke:var(--base)}.ecdf .ln.c{stroke:var(--cand)}
+.ecdf .xt{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:4px}
+.ecdf .cross{position:absolute;top:0;height:190px;width:1px;background:var(--ink-3);display:none;pointer-events:none}
+.yl{position:absolute;left:0;font-family:var(--mono);font-size:11px;color:var(--ink-3);transform:translateY(-50%)}
+.bars{display:grid;grid-template-columns:minmax(110px,180px) 1fr 64px;gap:8px 14px;align-items:center}
+.bars .track{height:14px;position:relative}
+.bars .fill{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--base)}
+.bars .fill.em{background:var(--signal)}
+.bars .n{font-family:var(--mono);font-size:12px;text-align:right}
+.heat{display:grid;gap:2px;font-family:var(--mono);font-size:12px}
+.heat .cell{padding:10px 6px;text-align:center;border-radius:3px}
+.heat .hd{color:var(--ink-3);font-size:11px;text-align:center;padding:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:500;text-align:left;color:var(--ink-3);font-family:var(--mono);font-size:11px;letter-spacing:.05em;
+text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--ink)}
+td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.num,th.num{text-align:right;white-space:nowrap}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+td .out{max-width:34ch;overflow-wrap:anywhere;white-space:pre-wrap;font-size:12.5px}
+td .out.bad{color:var(--signal-ink)}
+details{margin-top:18px}summary{cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.tip{position:fixed;z-index:9;pointer-events:none;background:var(--ink);color:var(--paper);font:12px/1.4 var(--mono);
+padding:6px 9px;border-radius:6px;max-width:300px;display:none;white-space:pre-line}
+footer{padding:26px 0 40px;color:var(--ink-3);font-size:12.5px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.filters button{font:12px var(--mono);border:1px solid var(--rule);background:transparent;color:var(--ink-2);
+border-radius:999px;padding:5px 12px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+@media (max-width:620px){.forest{grid-template-columns:96px 1fr 92px;gap:0 8px}.bars{grid-template-columns:96px 1fr 52px}
+.tile .v{font-size:24px}}
+</style></head><body><header class='top'><div class='wrap'><span class='brand'><b>assaygate</b> / judge calibration</span><span class='label'>report</span></div></header><main class='wrap'><div class='hero'><span class='pill'>judge calibration</span><h1>Judge–human agreement <em>73% → 75%</em></h1><div class='meta'><span>MT-Bench human judgments · test</span><span class='mono'>N=400 pairs · judge claude-haiku-5-5</span><span class='mono'>human–human 64% (with ties)</span></div><div class='tiles'><div class='tile'><div class='label'>agreement, naive</div><div class='v'>72.8%</div><div class='d'>kappa 0.551</div></div><div class='tile'><div class='label'>agreement, 6 +few-shot</div><div class='v'>75.2%</div><div class='d'>kappa 0.606</div></div><div class='tile'><div class='label'>naive: flips on swap</div><div class='v'>11% of pairs</div><div class='d'>final judge swaps and is order-invariant</div></div><div class='tile'><div class='label'>judge cost / item</div><div class='v'>$0.00053</div><div class='d'>6 +few-shot</div></div></div></div><section><span class='label'>Technique ladder</span><h2>Agreement with human experts, 3-way (A / B / tie)</h2><p class='lede'>Rows 1–6 each add one technique to the row above; rows 6a–6c change one thing relative to row 6 (the final judge, orange). Dot = agreement, line = 95% Wilson interval. Grey line = how often two individual <em>humans</em> agree on these pairs; the labels are majority votes, which are less noisy than one vote, so a judge can exceed it.</p><div class='forest' role='img' aria-label='estimates with confidence intervals'><div class='row'><div class='name'>1 naive</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:28.67%;width:47.73%'></div><div class='dot' style='left:53.72%'></div><div class='hit' data-tip='1 naive
+agreement 72.8% [68.2, 76.9]
+kappa 0.551
+judge ties 5%'></div></div><div class='val'>72.8%</div></div><div class='row'><div class='name'>2 +rubric</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:25.81%;width:48.00%'></div><div class='dot' style='left:50.97%'></div><div class='hit' data-tip='2 +rubric
+agreement 72.2% [67.7, 76.4]
+kappa 0.542
+judge ties 4%'></div></div><div class='val'>72.2%</div></div><div class='row'><div class='name'>3 +cot</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:34.38%;width:47.17%'></div><div class='dot' style='left:59.21%'></div><div class='hit' data-tip='3 +cot
+agreement 73.8% [69.2, 77.8]
+kappa 0.567
+judge ties 5%'></div></div><div class='val'>73.8%</div></div><div class='row'><div class='name'>4 +reference</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:38.68%;width:46.74%'></div><div class='dot' style='left:63.32%'></div><div class='hit' data-tip='4 +reference
+agreement 74.5% [70.0, 78.5]
+kappa 0.581
+judge ties 6%'></div></div><div class='val'>74.5%</div></div><div class='row'><div class='name'>5 +swap</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:42.98%;width:46.28%'></div><div class='dot' style='left:67.44%'></div><div class='hit' data-tip='5 +swap
+agreement 75.2% [70.8, 79.2]
+kappa 0.607
+judge ties 16%'></div></div><div class='val'>75.2%</div></div><div class='row'><div class='name'>6 +few-shot</div><div class='plot c'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:42.98%;width:46.28%'></div><div class='dot' style='left:67.44%'></div><div class='hit' data-tip='6 +few-shot
+agreement 75.2% [70.8, 79.2]
+kappa 0.606
+judge ties 16%'></div></div><div class='val'>75.2%</div></div><div class='row'><div class='name'>6a average swap</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:32.95%;width:47.32%'></div><div class='dot' style='left:57.84%'></div><div class='hit' data-tip='6a average swap
+agreement 73.5% [69.0, 77.6]
+kappa 0.570
+judge ties 10%'></div></div><div class='val'>73.5%</div></div><div class='row'><div class='name'>6b no swap</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:47.30%;width:45.81%'></div><div class='dot' style='left:71.56%'></div><div class='hit' data-tip='6b no swap
+agreement 76.0% [71.6, 79.9]
+kappa 0.608
+judge ties 8%'></div></div><div class='val'>76.0%</div></div><div class='row'><div class='name'>6c thinking, no CoT field</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:35.81%;width:47.03%'></div><div class='dot' style='left:60.58%'></div><div class='hit' data-tip='6c thinking, no CoT field
+agreement 74.0% [69.5, 78.1]
+kappa 0.586
+judge ties 16%'></div></div><div class='val'>74.0%</div></div><div></div><div class='axis'><span style='left:11.18%'>65%</span><span style='left:38.62%'>70%</span><span style='left:66.07%'>75%</span><span style='left:93.51%'>80%</span></div><div></div></div></section><section><span class='label'>Position bias</span><h2>Does the verdict survive swapping the order?</h2><p class='lede'>Every pair was judged twice, once as (A, B) and once as (B, A). Share of pairs where the two single calls agree. Variants that swap combine both calls, so their final verdict is order-invariant by construction; this measures the call underneath.</p><div class='bars'><div>1 naive</div><div class='track' data-tip='1 naive: 89%'><div class='fill' style='width:89.0%'></div></div><div class='n'>89%</div><div>2 +rubric</div><div class='track' data-tip='2 +rubric: 89%'><div class='fill' style='width:89.0%'></div></div><div class='n'>89%</div><div>3 +cot</div><div class='track' data-tip='3 +cot: 90%'><div class='fill' style='width:89.8%'></div></div><div class='n'>90%</div><div>4 +reference</div><div class='track' data-tip='4 +reference: 87%'><div class='fill' style='width:87.2%'></div></div><div class='n'>87%</div><div>5 +swap</div><div class='track' data-tip='5 +swap: 87%'><div class='fill' style='width:87.2%'></div></div><div class='n'>87%</div><div>6 +few-shot</div><div class='track' data-tip='6 +few-shot: 88%'><div class='fill em' style='width:88.5%'></div></div><div class='n'>88%</div><div>6a average swap</div><div class='track' data-tip='6a average swap: 88%'><div class='fill' style='width:88.5%'></div></div><div class='n'>88%</div><div>6b no swap</div><div class='track' data-tip='6b no swap: 88%'><div class='fill' style='width:88.5%'></div></div><div class='n'>88%</div><div>6c thinking, no CoT field</div><div class='track' data-tip='6c thinking, no CoT field: 89%'><div class='fill' style='width:89.0%'></div></div><div class='n'>89%</div></div><p class='lede' style='margin-top:22px'>Among inconsistent pairs, how often the response shown <em>first</em> won. Grey line = 50%, no direction.</p><div class='forest' role='img' aria-label='estimates with confidence intervals'><div class='row'><div class='name'>1 naive</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:30.41%;width:0.40%'></div><div class='dot' style='left:30.41%'></div><div class='hit' data-tip='1 naive: first-shown won 55% of 44 inconsistent pairs'></div></div><div class='val'>55%</div></div><div class='row'><div class='name'>2 +rubric</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:42.16%;width:0.40%'></div><div class='dot' style='left:42.16%'></div><div class='hit' data-tip='2 +rubric: first-shown won 57% of 44 inconsistent pairs'></div></div><div class='val'>57%</div></div><div class='row'><div class='name'>3 +cot</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:63.67%;width:0.40%'></div><div class='dot' style='left:63.67%'></div><div class='hit' data-tip='3 +cot: first-shown won 61% of 41 inconsistent pairs'></div></div><div class='val'>61%</div></div><div class='row'><div class='name'>4 +reference</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:93.10%;width:0.40%'></div><div class='dot' style='left:93.10%'></div><div class='hit' data-tip='4 +reference: first-shown won 67% of 51 inconsistent pairs'></div></div><div class='val'>67%</div></div><div class='row'><div class='name'>5 +swap</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:93.10%;width:0.40%'></div><div class='dot' style='left:93.10%'></div><div class='hit' data-tip='5 +swap: first-shown won 67% of 51 inconsistent pairs'></div></div><div class='val'>67%</div></div><div class='row'><div class='name'>6 +few-shot</div><div class='plot c'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:74.36%;width:0.40%'></div><div class='dot' style='left:74.36%'></div><div class='hit' data-tip='6 +few-shot: first-shown won 63% of 46 inconsistent pairs'></div></div><div class='val'>63%</div></div><div class='row'><div class='name'>6a average swap</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:74.36%;width:0.40%'></div><div class='dot' style='left:74.36%'></div><div class='hit' data-tip='6a average swap: first-shown won 63% of 46 inconsistent pairs'></div></div><div class='val'>63%</div></div><div class='row'><div class='name'>6b no swap</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:74.36%;width:0.40%'></div><div class='dot' style='left:74.36%'></div><div class='hit' data-tip='6b no swap: first-shown won 63% of 46 inconsistent pairs'></div></div><div class='val'>63%</div></div><div class='row'><div class='name'>6c thinking, no CoT field</div><div class='plot b'><div class='vline' style='left:6.90%'></div><div class='whisker' style='left:6.90%;width:0.40%'></div><div class='dot' style='left:6.90%'></div><div class='hit' data-tip='6c thinking, no CoT field: first-shown won 50% of 44 inconsistent pairs'></div></div><div class='val'>50%</div></div><div></div><div class='axis'><span style='left:6.90%'>50%</span><span style='left:32.76%'>55%</span><span style='left:58.62%'>60%</span><span style='left:84.48%'>65%</span></div><div></div></div></section><section><span class='label'>Verbosity bias</span><h2>How often the longer answer wins</h2><p class='lede'>Pairs where one answer is at least 1.5x longer and both humans and judge picked a winner. Grey line = humans (74%); orange dot = the judge; the segment between them is the bias.</p><div class='forest' role='img' aria-label='estimates with confidence intervals'><div class='row'><div class='name'>1 naive</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:6.90%;width:85.61%'></div><div class='dot' style='left:6.90%'></div><div class='hit' data-tip='1 naive
+judge picks longer 69%
+humans pick longer 74%
+n=206'></div></div><div class='val'>69% vs 74%</div></div><div class='row'><div class='name'>2 +rubric</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:23.17%;width:69.33%'></div><div class='dot' style='left:23.17%'></div><div class='hit' data-tip='2 +rubric
+judge picks longer 70%
+humans pick longer 74%
+n=206'></div></div><div class='val'>70% vs 74%</div></div><div class='row'><div class='name'>3 +cot</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:37.07%;width:55.44%'></div><div class='dot' style='left:37.07%'></div><div class='hit' data-tip='3 +cot
+judge picks longer 71%
+humans pick longer 74%
+n=205'></div></div><div class='val'>71% vs 74%</div></div><div class='row'><div class='name'>4 +reference</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:59.32%;width:33.19%'></div><div class='dot' style='left:59.32%'></div><div class='hit' data-tip='4 +reference
+judge picks longer 72%
+humans pick longer 74%
+n=204'></div></div><div class='val'>72% vs 74%</div></div><div class='row'><div class='name'>5 +swap</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:92.51%;width:0.60%'></div><div class='dot' style='left:93.10%'></div><div class='hit' data-tip='5 +swap
+judge picks longer 74%
+humans pick longer 74%
+n=189'></div></div><div class='val'>74% vs 74%</div></div><div class='row'><div class='name'>6 +few-shot</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:76.05%;width:16.45%'></div><div class='dot' style='left:76.05%'></div><div class='hit' data-tip='6 +few-shot
+judge picks longer 73%
+humans pick longer 74%
+n=193'></div></div><div class='val'>73% vs 74%</div></div><div class='row'><div class='name'>6a average swap</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:76.71%;width:15.79%'></div><div class='dot' style='left:76.71%'></div><div class='hit' data-tip='6a average swap
+judge picks longer 73%
+humans pick longer 74%
+n=197'></div></div><div class='val'>73% vs 74%</div></div><div class='row'><div class='name'>6b no swap</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:34.66%;width:57.84%'></div><div class='dot' style='left:34.66%'></div><div class='hit' data-tip='6b no swap
+judge picks longer 71%
+humans pick longer 74%
+n=204'></div></div><div class='val'>71% vs 74%</div></div><div class='row'><div class='name'>6c thinking, no CoT field</div><div class='plot c'><div class='vline' style='left:92.51%'></div><div class='whisker' style='left:88.88%;width:3.63%'></div><div class='dot' style='left:88.88%'></div><div class='hit' data-tip='6c thinking, no CoT field
+judge picks longer 74%
+humans pick longer 74%
+n=191'></div></div><div class='val'>74% vs 74%</div></div><div></div><div class='axis'><span style='left:24.80%'>70%</span><span style='left:58.33%'>72%</span><span style='left:91.86%'>74%</span></div><div></div></div></section><section><span class='label'>Confusion</span><h2>Where the judge and the humans disagree</h2><p class='lede'>Rows = human verdict, columns = judge verdict; darker = more pairs.</p><div class='grid2'><div><h3>1 naive</h3><div class='heat' style='grid-template-columns:auto repeat(3,1fr)'><div class='hd'></div><div class='hd'>judge A</div><div class='hd'>judge B</div><div class='hd'>judge tie</div><div class='hd' style='text-align:right'>human A</div><div class='cell' style='background:rgba(var(--seq),0.90);color:#fff' data-tip='human A, judge A: 151 pairs'>151</div><div class='cell' style='background:rgba(var(--seq),0.16);color:var(--ink)' data-tip='human A, judge B: 15 pairs'>15</div><div class='cell' style='background:rgba(var(--seq),0.09);color:var(--ink)' data-tip='human A, judge tie: 2 pairs'>2</div><div class='hd' style='text-align:right'>human B</div><div class='cell' style='background:rgba(var(--seq),0.23);color:var(--ink)' data-tip='human B, judge A: 28 pairs'>28</div><div class='cell' style='background:rgba(var(--seq),0.75);color:#fff' data-tip='human B, judge B: 124 pairs'>124</div><div class='cell' style='background:rgba(var(--seq),0.09);color:var(--ink)' data-tip='human B, judge tie: 1 pairs'>1</div><div class='hd' style='text-align:right'>human tie</div><div class='cell' style='background:rgba(var(--seq),0.26);color:var(--ink)' data-tip='human tie, judge A: 34 pairs'>34</div><div class='cell' style='background:rgba(var(--seq),0.24);color:var(--ink)' data-tip='human tie, judge B: 29 pairs'>29</div><div class='cell' style='background:rgba(var(--seq),0.17);color:var(--ink)' data-tip='human tie, judge tie: 16 pairs'>16</div></div></div><div><h3>6 +few-shot</h3><div class='heat' style='grid-template-columns:auto repeat(3,1fr)'><div class='hd'></div><div class='hd'>judge A</div><div class='hd'>judge B</div><div class='hd'>judge tie</div><div class='hd' style='text-align:right'>human A</div><div class='cell' style='background:rgba(var(--seq),0.90);color:#fff' data-tip='human A, judge A: 149 pairs'>149</div><div class='cell' style='background:rgba(var(--seq),0.12);color:var(--ink)' data-tip='human A, judge B: 8 pairs'>8</div><div class='cell' style='background:rgba(var(--seq),0.14);color:var(--ink)' data-tip='human A, judge tie: 11 pairs'>11</div><div class='hd' style='text-align:right'>human B</div><div class='cell' style='background:rgba(var(--seq),0.20);color:var(--ink)' data-tip='human B, judge A: 21 pairs'>21</div><div class='cell' style='background:rgba(var(--seq),0.72);color:#fff' data-tip='human B, judge B: 116 pairs'>116</div><div class='cell' style='background:rgba(var(--seq),0.17);color:var(--ink)' data-tip='human B, judge tie: 16 pairs'>16</div><div class='hd' style='text-align:right'>human tie</div><div class='cell' style='background:rgba(var(--seq),0.22);color:var(--ink)' data-tip='human tie, judge A: 26 pairs'>26</div><div class='cell' style='background:rgba(var(--seq),0.17);color:var(--ink)' data-tip='human tie, judge B: 17 pairs'>17</div><div class='cell' style='background:rgba(var(--seq),0.28);color:var(--ink)' data-tip='human tie, judge tie: 36 pairs'>36</div></div></div></div></section><section><span class='label'>Table view</span><h2>All variants</h2><div class='scroll'><table><thead><tr><th>variant</th><th class='num'>agree</th><th class='num'>kappa [95% CI]</th><th class='num'>non-tie agree</th><th class='num'>judge ties</th><th class='num'>swap-consistent</th><th class='num'>Δ agree vs naive (pp)</th><th class='num'>$/item</th><th>prompt files</th></tr></thead><tbody><tr><td>1 naive</td><td class='num'>72.8%</td><td class='num'>0.551 [0.485, 0.618]</td><td class='num'>86.5%</td><td class='num'>5%</td><td class='num'>89%</td><td class='num'>–</td><td class='num'>$0.00028</td><td class='mono' style='font-size:11.5px'>pairwise_naive</td></tr><tr><td>2 +rubric</td><td class='num'>72.2%</td><td class='num'>0.542 [0.475, 0.608]</td><td class='num'>86.2%</td><td class='num'>4%</td><td class='num'>89%</td><td class='num'>-0.5 [-2.8, +1.8] p=0.824</td><td class='num'>$0.00035</td><td class='mono' style='font-size:11.5px'>pairwise_rubric</td></tr><tr><td>3 +cot</td><td class='num'>73.8%</td><td class='num'>0.567 [0.502, 0.635]</td><td class='num'>88.3%</td><td class='num'>5%</td><td class='num'>90%</td><td class='num'>+1.0 [-1.8, +3.8] p=0.597</td><td class='num'>$0.00061</td><td class='mono' style='font-size:11.5px'>pairwise_rubric, pairwise_cot</td></tr><tr><td>4 +reference</td><td class='num'>74.5%</td><td class='num'>0.581 [0.515, 0.644]</td><td class='num'>89.5%</td><td class='num'>6%</td><td class='num'>87%</td><td class='num'>+1.8 [-1.3, +4.8] p=0.337</td><td class='num'>$0.00065</td><td class='mono' style='font-size:11.5px'>pairwise_rubric, pairwise_reference, pairwise_cot</td></tr><tr><td>5 +swap</td><td class='num'>75.2%</td><td class='num'>0.607 [0.543, 0.668]</td><td class='num'>91.4%</td><td class='num'>16%</td><td class='num'>87%</td><td class='num'>+2.5 [-1.2, +6.2] p=0.253</td><td class='num'>$0.00065</td><td class='mono' style='font-size:11.5px'>pairwise_rubric, pairwise_reference, pairwise_cot</td></tr><tr><td>6 +few-shot</td><td class='num'>75.2%</td><td class='num'>0.606 [0.543, 0.667]</td><td class='num'>90.1%</td><td class='num'>16%</td><td class='num'>88%</td><td class='num'>+2.5 [-1.2, +6.2] p=0.237</td><td class='num'>$0.00053</td><td class='mono' style='font-size:11.5px'>pairwise_rubric, pairwise_reference, pairwise_cot, pairwise_fewshot</td></tr><tr><td>6a average swap</td><td class='num'>73.5%</td><td class='num'>0.570 [0.506, 0.633]</td><td class='num'>89.8%</td><td class='num'>10%</td><td class='num'>88%</td><td class='num'>+0.8 [-2.5, +4.2] p=0.771</td><td class='num'>$0.00053</td><td class='mono' style='font-size:11.5px'>pairwise_rubric, pairwise_reference, pairwise_cot, pairwise_fewshot</td></tr><tr><td>6b no swap</td><td class='num'>76.0%</td><td class='num'>0.608 [0.544, 0.670]</td><td class='num'>88.6%</td><td class='num'>8%</td><td class='num'>88%</td><td class='num'>+3.2 [+0.2, +6.5] p=0.0533</td><td class='num'>$0.00053</td><td class='mono' style='font-size:11.5px'>pairwise_rubric, pairwise_reference, pairwise_cot, pairwise_fewshot</td></tr><tr><td>6c thinking, no CoT field</td><td class='num'>74.0%</td><td class='num'>0.586 [0.522, 0.651]</td><td class='num'>91.0%</td><td class='num'>16%</td><td class='num'>89%</td><td class='num'>+1.2 [-2.0, +4.8] p=0.568</td><td class='num'>$0.00043</td><td class='mono' style='font-size:11.5px'>pairwise_rubric, pairwise_reference, pairwise_fewshot</td></tr></tbody></table></div><p class='lede' style='margin-top:14px'>Human tie rate 20%. Paired deltas use a bootstrap over items and McNemar's exact test.</p></section></main><footer class='wrap'>Generated by assaygate. Every number on this page is computed from the run artifacts it names.</footer><script>
+(function(){var t=document.createElement('div');t.className='tip';document.body.appendChild(t);
+function show(e,s){t.textContent=s;t.style.display='block';var x=e.clientX+14,y=e.clientY+14;
+var r=t.getBoundingClientRect();if(x+r.width>innerWidth-8)x=e.clientX-r.width-14;if(y+r.height>innerHeight-8)y=e.clientY-r.height-14;
+t.style.left=x+'px';t.style.top=y+'px'}
+document.addEventListener('mousemove',function(e){var el=e.target.closest('[data-tip]');if(el){show(e,el.getAttribute('data-tip'))}
+else if(!e.target.closest('.ecdf'))t.style.display='none'});
+document.querySelectorAll('.ecdf').forEach(function(box){var d=JSON.parse(box.getAttribute('data-series'));
+var svg=box.querySelector('svg'),cr=box.querySelector('.cross');
+box.addEventListener('mousemove',function(e){var r=svg.getBoundingClientRect();var f=(e.clientX-r.left)/r.width;
+if(f<0||f>1){cr.style.display='none';t.style.display='none';return}
+var x=d.min+f*(d.max-d.min);cr.style.display='block';cr.style.left=(e.clientX-box.getBoundingClientRect().left)+'px';
+var lines=[d.fmt.replace('{}',x.toFixed(d.dp))];d.series.forEach(function(s){var n=0;for(var i=0;i<s.v.length;i++){if(s.v[i]<=x)n++}
+lines.push(s.name+': '+(100*n/s.v.length).toFixed(0)+'% of items at or below')});show(e,lines.join('\n'))});
+box.addEventListener('mouseleave',function(){cr.style.display='none';t.style.display='none'})});
+document.querySelectorAll('.filters').forEach(function(f){f.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+f.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});var m=b.getAttribute('data-metric');
+document.querySelectorAll(f.getAttribute('data-target')+' tr[data-metric]').forEach(function(r){r.style.display=(m==='*'||r.getAttribute('data-metric')===m)?'':'none'})})});
+})();
+</script></body></html>

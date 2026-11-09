@@ -14,3 +14,6 @@ Status: accepted · 2026-11-08
 
 ## Consequences
 The calibration costs about 2× a single-order run because of the second order; the cache makes re-runs free. The report is honest about which steps did not help (on this data a rubric alone did not move agreement).
+
+## Outcome on test (N = 400, run once)
+The final judge improved agreement by +2.5 points over the naive judge (CI [−1.2, +6.2]); kappa 0.551 → 0.606. Dev had suggested +11.7. The gain is concentrated where answers are checkable: +12.1 points on math/reasoning/coding (N = 140, CI [+5.0, +19.3]), −2.7 on open-ended categories (N = 260, CI [−6.9, +1.5]). The same split shows the same direction on dev. We keep the full judge as the default for verifiable tasks and recommend a lighter configuration for open-ended writing.

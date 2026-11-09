@@ -14,4 +14,27 @@ Judge `claude-haiku-5-5`. Human-human agreement on the same data: 64.2% with tie
 | 6b no swap | 77.5% [69.2%, 84.1%] | 0.645 [0.520, 0.752] | 88.9% (n=90) | 12.5% | 85.8% | 75.0% / 80.0% | +10.0 [+3.3, +17.5] | $0.00053 |
 | 6c thinking, no CoT field | 76.7% [68.3%, 83.3%] | 0.641 [0.521, 0.753] | 91.5% (n=82) | 22.5% | 83.3% | 76.3% / 80.0% | +9.2 [+0.8, +17.5] | $0.00042 |
 
+By category group (paired Δ agreement vs naive, 95% bootstrap CI):
+
+| subset | variant | N | agreement | kappa | Δ vs naive |
+|---|---|---|---|---|---|
+| math, reasoning, coding | 1 naive | 52 | 55.8% | 0.331 | – |
+| math, reasoning, coding | 2 +rubric | 52 | 53.8% | 0.305 | -1.9 [-9.6, +5.8] |
+| math, reasoning, coding | 3 +cot | 52 | 75.0% | 0.622 | +19.2 [+7.7, +30.8] |
+| math, reasoning, coding | 4 +reference | 52 | 76.9% | 0.652 | +21.2 [+9.6, +34.6] |
+| math, reasoning, coding | 5 +swap | 52 | 82.7% | 0.738 | +26.9 [+15.4, +40.4] |
+| math, reasoning, coding | 6 +few-shot | 52 | 82.7% | 0.738 | +26.9 [+15.4, +38.5] |
+| math, reasoning, coding | 6a average swap | 52 | 75.0% | 0.629 | +19.2 [+9.6, +30.8] |
+| math, reasoning, coding | 6b no swap | 52 | 78.8% | 0.683 | +23.1 [+11.5, +34.6] |
+| math, reasoning, coding | 6c thinking, no CoT field | 52 | 76.9% | 0.650 | +21.2 [+7.7, +34.6] |
+| writing, roleplay, extraction, stem, humanities | 1 naive | 68 | 76.5% | 0.590 | – |
+| writing, roleplay, extraction, stem, humanities | 2 +rubric | 68 | 75.0% | 0.563 | -1.5 [-5.9, +2.9] |
+| writing, roleplay, extraction, stem, humanities | 3 +cot | 68 | 73.5% | 0.539 | -2.9 [-11.8, +4.4] |
+| writing, roleplay, extraction, stem, humanities | 4 +reference | 68 | 72.1% | 0.513 | -4.4 [-11.8, +2.9] |
+| writing, roleplay, extraction, stem, humanities | 5 +swap | 68 | 73.5% | 0.561 | -2.9 [-13.2, +7.4] |
+| writing, roleplay, extraction, stem, humanities | 6 +few-shot | 68 | 76.5% | 0.613 | +0.0 [-8.8, +8.8] |
+| writing, roleplay, extraction, stem, humanities | 6a average swap | 68 | 75.0% | 0.585 | -1.5 [-10.3, +7.4] |
+| writing, roleplay, extraction, stem, humanities | 6b no swap | 68 | 76.5% | 0.593 | +0.0 [-8.8, +7.4] |
+| writing, roleplay, extraction, stem, humanities | 6c thinking, no CoT field | 68 | 76.5% | 0.608 | +0.0 [-8.8, +8.8] |
+
 Human tie rate: 23.3%. Spend for this run: $0.0000 (2160 judge calls, 2160 served from cache).

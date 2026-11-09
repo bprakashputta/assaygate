@@ -98,3 +98,34 @@ async def test_few_shot_pool_must_not_overlap(tmp_path, make_llm):
     )
     with pytest.raises(ValueError, match="overlaps"):
         await calibrate(cfg, llm)
+
+
+async def test_calibration_report_features_declared_final_variant(tmp_path, make_llm):
+    from assaygate.report import render_calibration_html
+
+    rows = [
+        {
+            "id": f"c{i}",
+            "question": "q",
+            "answer_a": "x" * (10 + i),
+            "answer_b": "y" * 40,
+            "human": "AB"[i % 2],
+        }
+        for i in range(8)
+    ]
+    (tmp_path / "c.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
+    llm, _ = make_llm(lambda r: {"winner": "A"})  # maximally position-biased judge
+    cfg = CalibrationConfig(
+        dataset="c.jsonl",
+        base_dir=str(tmp_path),
+        variants=[
+            VariantSpec(name="naive"),
+            VariantSpec(name="final", swap=True, swap_policy="conservative"),
+        ],
+    )
+    res = await calibrate(cfg, llm)
+    naive, final = res.variants
+    assert naive.consistency == 0.0 and naive.first_position_rate == 1.0
+    assert final.judge_tie_rate == 1.0  # every pair flips, conservative swap -> tie
+    html = render_calibration_html(res, {"final_variant": "final", "judge_model": "fake"})
+    assert "Position bias" in html and "final" in html and "<html" in html

@@ -17,7 +17,7 @@
       "ci_low": -0.1,
       "ci_high": -0.02,
       "p_value": 0.004249787510624469,
-      "rule": "fail if CI high < -0",
+      "rule": "fail if CI high < 0",
       "reason": "worse by 0.060 (CI excludes 0); 28 items lost, 10 gained (McNemar p=0.0051)"
     },
     {
