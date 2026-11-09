@@ -2,11 +2,14 @@
 
 One file, no build step, no JS framework: charts are HTML/CSS (forest plots, bars, heatmaps)
 plus one SVG ECDF per distribution, so text stays readable at phone width. A ~30-line script
-adds hover tooltips; every chart also has a table view. Fonts load from Google Fonts with
-system fallbacks, so the report still renders offline.
+adds hover tooltips; every chart also has a table view. System font stacks only, so the
+report renders identically offline and inside CI artifact viewers.
 
-Colours: baseline = blue, candidate = signal orange (validated with the dataviz palette
-checker on both paper surfaces); pass/fail always carries a text label, never colour alone.
+Look: a CI checks page. Dark by default (follows the OS when it asks for light). Colour is
+reserved for state: pass green, fail red, warn amber, plus one neutral blue for links, CI
+whiskers and the candidate series; the baseline series is neutral grey and dashed (validated
+with the dataviz palette checker on #ffffff and #0d1117). Pass/fail always carries an icon
+and a text label, never colour alone.
 """
 
 from __future__ import annotations
@@ -25,106 +28,147 @@ if TYPE_CHECKING:
     from .runner import Run
 
 CSS = """
-:root{--paper:#f5f2eb;--paper-2:#ece7dc;--card:#fbf9f4;--ink:#17160f;--ink-2:#4a463c;--ink-3:#6f695d;
---rule:#d9d2c3;--grid:#e4ddcf;--signal:#c8431a;--signal-ink:#a5360f;--signal-wash:#f4dccf;
---base:#3b5bdb;--cand:#c8431a;--seq:59,91,219;color-scheme:light;
---serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
---sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
---mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#12110d;--paper-2:#1b1a15;
---card:#181712;--ink:#ede7da;--ink-2:#bdb6a6;--ink-3:#8b8576;--rule:#2f2d25;--grid:#26241d;
---signal:#ff7a4a;--signal-ink:#ff9a72;--signal-wash:#3a1f14;--base:#6f8cf0;--cand:#e8602f;
---seq:111,140,240;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#12110d;--paper-2:#1b1a15;--card:#181712;--ink:#ede7da;--ink-2:#bdb6a6;
---ink-3:#8b8576;--rule:#2f2d25;--grid:#26241d;--signal:#ff7a4a;--signal-ink:#ff9a72;--signal-wash:#3a1f14;
---base:#6f8cf0;--cand:#e8602f;--seq:111,140,240;color-scheme:dark}
+:root{--bg:#0d1117;--bg-subtle:#161b22;--bg-inset:#010409;--fg:#e6edf3;--fg-muted:#8d96a0;
+--border:#30363d;--border-muted:#21262d;--grid:#21262d;--pass:#3fb950;--pass-bg:rgba(46,160,67,.15);
+--fail:#f85149;--fail-bg:rgba(248,81,73,.12);--warn:#d29922;--warn-bg:rgba(187,128,9,.15);
+--link:#4493f8;--base:#8d96a0;--cand:#4493f8;--seq:68,147,248;--tip-bg:#e6edf3;--tip-fg:#0d1117;
+--focus:#1f6feb;color-scheme:dark;
+--sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif;
+--mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#ffffff;--bg-subtle:#f6f8fa;
+--bg-inset:#f6f8fa;--fg:#24292f;--fg-muted:#57606a;--border:#d0d7de;--border-muted:#d8dee4;--grid:#eaeef2;
+--pass:#1a7f37;--pass-bg:#dafbe1;--fail:#cf222e;--fail-bg:#ffebe9;--warn:#9a6700;--warn-bg:#fff8c5;
+--link:#0969da;--base:#6e7781;--cand:#0969da;--seq:9,105,218;--tip-bg:#24292f;--tip-fg:#ffffff;
+--focus:#0969da;color-scheme:light}}
+:root[data-theme="light"]{--bg:#ffffff;--bg-subtle:#f6f8fa;--bg-inset:#f6f8fa;--fg:#24292f;--fg-muted:#57606a;
+--border:#d0d7de;--border-muted:#d8dee4;--grid:#eaeef2;--pass:#1a7f37;--pass-bg:#dafbe1;--fail:#cf222e;
+--fail-bg:#ffebe9;--warn:#9a6700;--warn-bg:#fff8c5;--link:#0969da;--base:#6e7781;--cand:#0969da;
+--seq:9,105,218;--tip-bg:#24292f;--tip-fg:#ffffff;--focus:#0969da;color-scheme:light}
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.55 var(--sans);
--webkit-font-smoothing:antialiased;overflow-x:hidden}
-.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
-.mono,.label,code,td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
-code{font-size:.86em;background:var(--paper-2);padding:1px 5px;border-radius:3px}
-header.top{border-bottom:1px solid var(--rule)}
-header.top .wrap{display:flex;justify-content:space-between;align-items:center;height:52px;gap:12px}
-.brand{font-family:var(--mono);font-size:13px;color:var(--ink-2)}.brand b{color:var(--ink);font-weight:500}
-.hero{padding:40px 0 28px;border-bottom:1px solid var(--rule)}
-h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5.4vw,60px);line-height:1;
-letter-spacing:-.015em;margin:14px 0 18px;max-width:28ch}
-h1 em{font-style:italic;color:var(--signal)}
-h2{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3vw,34px);line-height:1.05;margin:0 0 6px}
-h3{font-size:15px;font-weight:500;margin:0 0 10px}
-.meta{display:flex;flex-wrap:wrap;gap:6px 22px;color:var(--ink-2);font-size:13px}
-.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:999px;
-padding:4px 12px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-.pill.fail{border-color:var(--signal);color:var(--signal-ink);background:var(--signal-wash)}
-.pill.pass{color:var(--ink)}
-.pill i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
-section{padding:34px 0;border-bottom:1px solid var(--rule)}
-.lede{color:var(--ink-2);max-width:72ch;margin:0 0 22px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:1px solid var(--rule);
-border-left:1px solid var(--rule);margin-top:26px}
-.tile{padding:16px 18px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);min-width:0}
-.tile .v{font-size:28px;font-weight:500;letter-spacing:-.01em;margin:6px 0 2px}
-.tile .d{font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
-.tile.fail .d b{color:var(--signal-ink)}
-.status{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
-.status.fail{color:var(--signal-ink)}.status.pass{color:var(--ink-3)}
-.forest{display:grid;grid-template-columns:minmax(110px,180px) 1fr minmax(120px,170px);gap:0 14px;align-items:center}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 14px/1.5 var(--sans);overflow-x:hidden}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-radius:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,3vw,32px)}
+.mono,code,td.num,th.num,.val,.n,.heat,.tip{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-size:12px}
+code{font-size:12px;background:var(--bg-subtle);border:1px solid var(--border-muted);padding:1px 6px;border-radius:6px}
+.label{font-size:12px;color:var(--fg-muted)}
+header.top{background:var(--bg-inset);border-bottom:1px solid var(--border)}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;height:48px;gap:12px}
+.brand{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--fg-muted);min-width:0;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand b{color:var(--fg);font-weight:600}.brand svg{flex:none;color:var(--fg)}
+header.top .label{font-family:var(--mono);font-size:11px;border:1px solid var(--border);border-radius:2em;padding:0 7px}
+.hero{display:flex;gap:16px;align-items:flex-start;padding:24px 0 20px}
+.hero:not(:has(.sicon)){display:block}
+.sicon{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;margin-top:2px}
+.sicon.fail{background:var(--fail)}.sicon.pass{background:var(--pass)}.sicon.warn{background:var(--warn)}
+.sicon svg{width:22px;height:22px}
+h1{font-weight:600;font-size:clamp(22px,3.2vw,28px);line-height:1.25;margin:0 0 8px;letter-spacing:0}
+h1 em{font-style:normal;font-family:var(--mono);font-weight:600;font-size:.92em}
+.hero.fail h1 em{font-family:inherit;font-size:1em;color:var(--fail)}
+h2{font-weight:600;font-size:16px;line-height:1.35;margin:0}
+h3{font-size:13px;font-weight:600;margin:0 0 10px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--fg-muted);font-size:13px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:2em;
+padding:0 10px;font-size:12px;font-weight:500;line-height:22px;color:var(--fg-muted);margin-bottom:10px}
+.checks{list-style:none;margin:0 0 8px;padding:0;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.checks .chd{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;background:var(--bg-subtle);
+padding:10px 16px;font-size:13px;color:var(--fg-muted);border-bottom:1px solid var(--border)}
+.checks .chd b{color:var(--fg)}
+.check{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:4px 10px;align-items:start;
+padding:10px 16px;border-top:1px solid var(--border-muted)}
+.checks .chd+.check{border-top:0}
+.check .ic{margin-top:2px}.check.fail .ic{color:var(--fail)}.check.pass .ic{color:var(--pass)}.check.warn .ic{color:var(--warn)}
+.check .cn b{font-weight:600}.check .why{display:block;color:var(--fg-muted);font-size:12.5px}
+.check .cv{font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap;color:var(--fg-muted)}
+.check .cv b{color:var(--fg);font-weight:600;font-size:13px}
+.check.fail .cv .d{color:var(--fail)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));border:1px solid var(--border);
+border-radius:6px;overflow:hidden;margin-top:18px;gap:1px;background:var(--border)}
+.tile{padding:12px 16px;background:var(--bg);min-width:0}
+.tile .v{font-family:var(--mono);font-size:22px;font-weight:600;margin:2px 0;font-variant-numeric:tabular-nums}
+.tile .d{font-family:var(--mono);font-size:12px;color:var(--fg-muted)}
+.status{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.status::before{font-family:var(--mono)}
+.status.fail{color:var(--fail)}.status.fail::before{content:"✕"}
+.status.pass{color:var(--pass)}.status.pass::before{content:"✓"}
+.status.warn{color:var(--warn)}.status.warn::before{content:"!"}
+section{border:1px solid var(--border);border-radius:6px;padding:0 16px 16px;margin:16px 0;background:var(--bg);min-width:0}
+section>.label{display:block;margin:0 -16px;padding:10px 16px 0;background:var(--bg-subtle);font-family:var(--mono);font-size:11.5px}
+section>h2{margin:0 -16px 14px;padding:2px 16px 10px;background:var(--bg-subtle);border-bottom:1px solid var(--border)}
+.lede{color:var(--fg-muted);max-width:90ch;margin:0 0 14px;font-size:13px}
+.forest{display:grid;grid-template-columns:minmax(110px,190px) 1fr minmax(84px,150px);gap:0;align-items:center}
 .forest .row{display:contents}
-.forest .name{font-size:13.5px;padding:10px 0;border-top:1px solid var(--rule);overflow-wrap:anywhere}
-.forest .val{font-family:var(--mono);font-size:12px;color:var(--ink-2);text-align:right;padding:10px 0;
-border-top:1px solid var(--rule)}
-.forest .plot{position:relative;height:40px;border-top:1px solid var(--rule)}
+.forest .name{font-size:13px;padding:8px 12px 8px 0;border-top:1px solid var(--border-muted);overflow-wrap:anywhere}
+.forest .name.bad::before{content:"✕ ";color:var(--fail);font-family:var(--mono);font-weight:700}
+.forest .name.ok::before{content:"✓ ";color:var(--pass);font-family:var(--mono);font-weight:700}
+.forest .val{font-size:12px;color:var(--fg);text-align:right;padding:8px 0 8px 12px;border-top:1px solid var(--border-muted)}
+.forest .plot{position:relative;height:34px;border-top:1px solid var(--border-muted)}
 .forest .axis{position:relative;height:22px}
-.forest .axis span{position:absolute;top:4px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--ink-3)}
-.vline{position:absolute;top:0;bottom:0;width:1px;background:var(--ink-3)}
-.vline.limit{background:var(--signal);opacity:.55}
-.whisker{position:absolute;top:50%;height:2px;margin-top:-1px;border-radius:1px}
-.dot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;
-box-shadow:0 0 0 2px var(--paper)}
-.ok .whisker,.ok .dot{background:var(--ink)}.bad .whisker,.bad .dot{background:var(--signal)}
+.forest .axis span{position:absolute;top:4px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--fg-muted)}
+.vline{position:absolute;top:0;bottom:0;width:1px;background:var(--fg-muted);opacity:.7}
+.vline.limit{width:0;background:none;border-left:1px dashed var(--fail);opacity:1}
+.whisker{position:absolute;top:50%;height:2px;margin-top:-1px}
+.whisker::before,.whisker::after{content:"";position:absolute;top:-4px;width:1px;height:10px;background:inherit}
+.whisker::before{left:0}.whisker::after{right:0}
+.dot{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:2px;
+box-shadow:0 0 0 2px var(--bg)}
+.ok .whisker,.ok .dot{background:var(--link)}.bad .whisker,.bad .dot{background:var(--fail)}
+.bad .dot{transform:rotate(45deg)}
 .b .whisker,.b .dot{background:var(--base)}.c .whisker,.c .dot{background:var(--cand)}
 .hit{position:absolute;inset:0;cursor:default}
-.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--ink-2);margin:0 0 12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--fg-muted);margin:0 0 10px}
 .legend span{display:inline-flex;align-items:center;gap:7px}
-.key{width:10px;height:10px;border-radius:50%;display:inline-block}.key.b{background:var(--base)}
-.key.c{background:var(--cand)}.key.line{width:16px;height:2px;border-radius:1px}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:28px}
+.key{width:16px;height:0;border-top:2px solid;display:inline-block}.key.b{border-color:var(--base);border-top-style:dashed}
+.key.c{border-color:var(--cand)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px}
 .ecdf{position:relative}
 .ecdf svg{display:block;width:100%;height:190px;overflow:visible}
 .ecdf .gl{stroke:var(--grid);stroke-width:1;vector-effect:non-scaling-stroke}
 .ecdf .ln{fill:none;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
-.ecdf .ln.b{stroke:var(--base)}.ecdf .ln.c{stroke:var(--cand)}
-.ecdf .xt{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:4px}
-.ecdf .cross{position:absolute;top:0;height:190px;width:1px;background:var(--ink-3);display:none;pointer-events:none}
-.yl{position:absolute;left:0;font-family:var(--mono);font-size:11px;color:var(--ink-3);transform:translateY(-50%)}
-.bars{display:grid;grid-template-columns:minmax(110px,180px) 1fr 64px;gap:8px 14px;align-items:center}
-.bars .track{height:14px;position:relative}
-.bars .fill{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--base)}
-.bars .fill.em{background:var(--signal)}
-.bars .n{font-family:var(--mono);font-size:12px;text-align:right}
-.heat{display:grid;gap:2px;font-family:var(--mono);font-size:12px}
-.heat .cell{padding:10px 6px;text-align:center;border-radius:3px}
-.heat .hd{color:var(--ink-3);font-size:11px;text-align:center;padding:4px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{font-weight:500;text-align:left;color:var(--ink-3);font-family:var(--mono);font-size:11px;letter-spacing:.05em;
-text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--ink)}
-td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+.ecdf .ln.b{stroke:var(--base);stroke-dasharray:5 4}.ecdf .ln.c{stroke:var(--cand)}
+.ecdf .xt{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--fg-muted);margin-top:4px}
+.ecdf .cross{position:absolute;top:0;height:190px;width:1px;background:var(--fg-muted);display:none;pointer-events:none}
+.yl{position:absolute;left:0;font-family:var(--mono);font-size:11px;color:var(--fg-muted);transform:translateY(-50%)}
+.bars{display:grid;grid-template-columns:minmax(110px,190px) 1fr 56px;gap:8px 12px;align-items:center;font-size:13px}
+.bars .track{height:12px;position:relative;background:var(--border-muted);border-radius:2px}
+.bars .fill{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--base)}
+.bars .fill.em{background:var(--cand)}
+.bars .n{font-size:12px;text-align:right}
+.heat{display:grid;gap:2px;font-size:12px}
+.heat .cell{padding:9px 6px;text-align:center;border-radius:2px}
+.heat .hd{color:var(--fg-muted);font-size:11px;text-align:center;padding:4px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-weight:600;text-align:left;color:var(--fg-muted);font-size:12px;padding:6px 10px;
+background:var(--bg-subtle);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--border-muted);vertical-align:top}
+tbody tr:hover td{background:var(--bg-subtle)}
 td.num,th.num{text-align:right;white-space:nowrap}
-.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-td .out{max-width:34ch;overflow-wrap:anywhere;white-space:pre-wrap;font-size:12.5px}
-td .out.bad{color:var(--signal-ink)}
-details{margin-top:18px}summary{cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
-.tip{position:fixed;z-index:9;pointer-events:none;background:var(--ink);color:var(--paper);font:12px/1.4 var(--mono);
-padding:6px 9px;border-radius:6px;max-width:300px;display:none;white-space:pre-line}
-footer{padding:26px 0 40px;color:var(--ink-3);font-size:12.5px}
-.filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
-.filters button{font:12px var(--mono);border:1px solid var(--rule);background:transparent;color:var(--ink-2);
-border-radius:999px;padding:5px 12px;cursor:pointer}
-.filters button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-@media (max-width:620px){.forest{grid-template-columns:96px 1fr 92px;gap:0 8px}.bars{grid-template-columns:96px 1fr 52px}
-.tile .v{font-size:24px}}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:6px}
+.scroll table tr:last-child td{border-bottom:0}
+td .out{max-width:36ch;overflow-wrap:anywhere;white-space:pre-wrap;font-family:var(--mono);font-size:12px;
+padding:2px 6px;border-left:2px solid transparent}
+td .out.bad{background:var(--fail-bg);border-left-color:var(--fail)}
+td .out.bad::before{content:"- ";color:var(--fail);font-weight:700}
+td .out.exp{background:var(--pass-bg);border-left-color:var(--pass)}
+td .out.exp::before{content:"+ ";color:var(--pass);font-weight:700}
+details{margin-top:18px}summary{cursor:pointer;font-size:12px;color:var(--fg-muted)}
+.tip{position:fixed;z-index:9;pointer-events:none;background:var(--tip-bg);color:var(--tip-fg);font-size:12px;
+line-height:1.45;padding:6px 9px;border-radius:6px;max-width:300px;display:none;white-space:pre-line}
+footer{padding-bottom:40px;color:var(--fg-muted);font-size:12px;margin-top:24px}
+footer::before{content:"";display:block;border-top:1px solid var(--border);margin-bottom:14px}
+section>:first-child:not(.label){margin-top:16px}
+.filters{display:inline-flex;flex-wrap:wrap;margin:0 0 12px;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.filters button{font:500 12px var(--sans);border:0;border-left:1px solid var(--border);background:var(--bg);
+color:var(--fg);padding:5px 12px;cursor:pointer}
+.filters button:first-child{border-left:0}
+.filters button[aria-pressed="true"]{background:var(--bg-subtle);font-weight:600;box-shadow:inset 0 -2px 0 var(--link)}
+@media (max-width:620px){.forest{grid-template-columns:92px 1fr 70px}.bars{grid-template-columns:92px 1fr 48px}
+.tile .v{font-size:19px}.hero{gap:12px}.sicon{width:32px;height:32px}.check{grid-template-columns:20px minmax(0,1fr)}
+.check .cv{grid-column:2;text-align:left;white-space:normal}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 """
 
 JS = """
@@ -148,12 +192,39 @@ document.querySelectorAll(f.getAttribute('data-target')+' tr[data-metric]').forE
 })();
 """
 
-FONTS = (
-    '<link rel="preconnect" href="https://fonts.googleapis.com">'
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600'
-    '&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">'
+FONTS = ""  # system font stacks only; nothing is fetched at render time
+
+_ICON = {
+    "fail": "<path d='M5 5l10 10M15 5L5 15' stroke='currentColor' stroke-width='2.2' "
+    "stroke-linecap='round' fill='none'/>",
+    "pass": "<path d='M4.5 10.5l3.5 3.5 7.5-8' stroke='currentColor' stroke-width='2.2' "
+    "stroke-linecap='round' stroke-linejoin='round' fill='none'/>",
+    "warn": "<path d='M10 4.5v7M10 15v.5' stroke='currentColor' stroke-width='2.4' "
+    "stroke-linecap='round' fill='none'/>",
+}
+_RING = {
+    "fail": "<circle cx='10' cy='10' r='8.2' fill='none' stroke='currentColor' stroke-width='1.6'/>"
+    "<path d='M7 7l6 6M13 7l-6 6' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'/>",
+    "pass": "<circle cx='10' cy='10' r='8.2' fill='none' stroke='currentColor' stroke-width='1.6'/>"
+    "<path d='M6.5 10.3l2.4 2.4 4.6-5' stroke='currentColor' stroke-width='1.8' fill='none' "
+    "stroke-linecap='round' stroke-linejoin='round'/>",
+    "warn": "<circle cx='10' cy='10' r='8.2' fill='none' stroke='currentColor' stroke-width='1.6'/>"
+    "<path d='M10 6v5M10 13.6v.4' stroke='currentColor' stroke-width='1.9' stroke-linecap='round'/>",
+}
+_LOGO = (
+    "<svg width='18' height='18' viewBox='0 0 20 20' aria-hidden='true'><rect x='2' y='2' "
+    "width='16' height='16' rx='3' fill='none' stroke='currentColor' stroke-width='1.6'/>"
+    "<path d='M6 10.5l2.5 2.5L14 7' stroke='currentColor' stroke-width='1.8' fill='none' "
+    "stroke-linecap='round' stroke-linejoin='round'/></svg>"
 )
+
+
+def icon(status: str, ring: bool = False) -> str:
+    paths = (_RING if ring else _ICON).get(status, _ICON["warn"])
+    size = 16 if ring else 22
+    return (
+        f"<svg width='{size}' height='{size}' viewBox='0 0 20 20' aria-hidden='true'>{paths}</svg>"
+    )
 
 
 def e(x: Any) -> str:
@@ -166,8 +237,9 @@ def page(title: str, body: str, subtitle: str = "") -> str:
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         f"<title>{e(title)}</title><meta name='description' content='{e(subtitle)}'>"
         f"{FONTS}<style>{CSS}</style></head><body>"
-        "<header class='top'><div class='wrap'><span class='brand'><b>assaygate</b>"
-        f" / {e(subtitle)}</span><span class='label'>report</span></div></header>"
+        f"<header class='top'><div class='wrap'><span class='brand'>{_LOGO}<b>assaygate</b>"
+        f"<span>/</span><span class='mono'>{e(subtitle)}</span></span>"
+        "<span class='label'>report</span></div></header>"
         f"<main class='wrap'>{body}</main>"
         "<footer class='wrap'>Generated by assaygate. Every number on this page is computed "
         "from the run artifacts it names.</footer>"
@@ -222,7 +294,7 @@ def forest(
         for lim in r.get("limits", limits) or []:
             lines += f"<div class='vline limit' style='left:{_pct(lim, lo, hi):.2f}%'></div>"
         out.append(
-            f"<div class='row'><div class='name'>{e(r['name'])}</div>"
+            f"<div class='row'><div class='name {e(r.get(cls_key, 'ok'))}'>{e(r['name'])}</div>"
             f"<div class='plot {e(r.get(cls_key, 'ok'))}'>{lines}"
             f"<div class='whisker' style='left:{left:.2f}%;width:{max(right - left, 0.4):.2f}%'></div>"
             f"<div class='dot' style='left:{_pct(r['est'], lo, hi):.2f}%'></div>"
@@ -311,14 +383,20 @@ def render_compare_html(result: GateResult, baseline: Run, candidate: Run) -> st
         else f"Gate passed: {len(result.checks)} checks, no regression"
     )
     bm, cm = baseline.manifest, candidate.manifest
+    n_pass = sum(c.status == "pass" for c in result.checks)
+    n_warn = sum(c.status == "warn" for c in result.checks)
     hero = (
-        f"<div class='hero'><span class='pill {verdict}'><i></i>{verdict}</span>"
+        f"<div class='hero {verdict}'><div class='sicon {verdict}' role='img' "
+        f"aria-label='gate {verdict}'>{icon(verdict)}</div><div>"
         f"<h1>{headline}</h1><div class='meta'>"
         f"<span>suite <code>{e(cm.suite)}</code></span>"
         f"<span>baseline <code>{e(bm.label or bm.run_id)}</code></span>"
         f"<span>candidate <code>{e(cm.label or cm.run_id)}</code></span>"
         f"<span class='mono'>{result.n_paired} paired items · {int(result.level * 100)}% CIs</span>"
-        "</div><div class='tiles'>"
+        "</div></div></div><ul class='checks' aria-label='gate checks'><li class='chd'>"
+        f"<span><b>{len(result.checks)} checks</b> · {len(fails)} failing, {n_pass} successful"
+        + (f", {n_warn} warning" if n_warn else "")
+        + "</span><span class='mono'>value · Δ · CI</span></li>"
     )
     for ch in result.checks:
         delta = f"{ch.delta:+.3f}" if ch.kind == "quality" else f"x{ch.delta:.2f}"
@@ -328,12 +406,13 @@ def render_compare_html(result: GateResult, baseline: Run, candidate: Run) -> st
             else f"[x{ch.ci_low:.2f}, x{ch.ci_high:.2f}]"
         )
         hero += (
-            f"<div class='tile {ch.status}'><div class='label'>{e(ch.name)}</div>"
-            f"<div class='v'>{e(_fmt_value(ch.kind, ch.candidate))}</div>"
-            f"<div class='d'><b>{delta}</b> {ci}</div>"
-            f"<div class='status {ch.status}'>{ch.status} · {e(ch.reason.split(';')[0])}</div></div>"
+            f"<li class='check {ch.status}'><span class='ic'>{icon(ch.status, ring=True)}</span>"
+            f"<div class='cn'><b>{e(ch.name)}</b><span class='why'><span class='status {ch.status}'>"
+            f"{ch.status}</span> · {e(ch.reason.split(';')[0])}</span></div>"
+            f"<div class='cv'><b>{e(_fmt_value(ch.kind, ch.candidate))}</b> "
+            f"<span class='d'>{delta}</span> {ci}</div></li>"
         )
-    hero += "</div></div>"
+    hero += "</ul>"
 
     q = [c for c in result.checks if c.kind == "quality"]
     qrows = [
@@ -354,7 +433,7 @@ def render_compare_html(result: GateResult, baseline: Run, candidate: Run) -> st
         "<section><span class='label'>Quality</span><h2>Per-metric change, candidate − baseline</h2>"
         "<p class='lede'>Dot = mean paired difference; line = 95% bootstrap CI over items. "
         "A metric fails when its whole interval sits left of zero (or of the allowed margin, "
-        "shown as a thin orange line). Failing rows are drawn in orange.</p>"
+        "shown as a dashed red line). Failing rows are drawn in red and marked ✕.</p>"
         + (forest(qrows, ref=0.0, limits=margins) if qrows else "<p>No shared metrics.</p>")
         + "</section>"
     )
@@ -393,7 +472,7 @@ def render_compare_html(result: GateResult, baseline: Run, candidate: Run) -> st
     lims: list[float] = []
     ops = (
         "<section><span class='label'>Cost and latency</span><h2>What the candidate costs to run</h2>"
-        "<p class='lede'>Ratios candidate ÷ baseline with paired bootstrap CIs (orange line = "
+        "<p class='lede'>Ratios candidate ÷ baseline with paired bootstrap CIs (dashed red line = "
         "that row's allowed increase). Below: the full per-item distributions as cumulative curves; hover "
         "to read the share of items at or below a value.</p>"
         + (forest(rrows, ref=1.0, limits=lims, tick_fmt="x{:.2f}") if rrows else "")
@@ -428,7 +507,7 @@ def render_compare_html(result: GateResult, baseline: Run, candidate: Run) -> st
         f"<td class='num'>{r.baseline:.2f} → {r.candidate:.2f}</td>"
         f"<td><div class='out'>{e(r.baseline_output)}</div></td>"
         f"<td><div class='out bad'>{e(r.candidate_output)}</div></td>"
-        f"<td><div class='out'>{e(r.expected)}</div></td></tr>"
+        f"<td><div class='out exp'>{e(r.expected)}</div></td></tr>"
         for r in result.regressions[:300]
     )
     diff = (
@@ -480,7 +559,7 @@ def render_run_html(run: Run) -> str:
                 "est": ci.estimate,
                 "lo": ci.low,
                 "hi": ci.high,
-                "cls": "b",
+                "cls": "c",
                 "tip": f"{metric}\nmean {ci.estimate:.3f} [{ci.low:.3f}, {ci.high:.3f}]\nn={vals.size}",
                 "val": f"{ci.estimate:.3f}",
             }
@@ -586,7 +665,7 @@ def render_calibration_html(result: CalibrationResult, payload: dict[str, Any]) 
     ladder = (
         "<section><span class='label'>Technique ladder</span><h2>Agreement with human experts, 3-way (A / B / tie)</h2>"
         "<p class='lede'>Rows 1–6 each add one technique to the row above; rows 6a–6c change one "
-        "thing relative to row 6 (the final judge, orange). Dot = agreement, line = 95% Wilson "
+        "thing relative to row 6 (the final judge, blue). Dot = agreement, line = 95% Wilson "
         "interval. Grey line = how often two individual <em>humans</em> agree on these pairs; the "
         "labels are majority votes, which are less noisy than one vote, so a judge can exceed it.</p>"
         + forest(rows, ref=hh_tie if hh_tie else 0.5, fmt="{:.1%}", tick_fmt="{:.0%}")
@@ -658,7 +737,7 @@ def render_calibration_html(result: CalibrationResult, payload: dict[str, Any]) 
     verbosity = (
         "<section><span class='label'>Verbosity bias</span><h2>How often the longer answer wins</h2>"
         f"<p class='lede'>Pairs where one answer is at least 1.5x longer and both humans and judge "
-        f"picked a winner. Grey line = humans ({100 * hl:.0f}%); orange dot = the judge; the "
+        f"picked a winner. Grey line = humans ({100 * hl:.0f}%); blue dot = the judge; the "
         "segment between them is the bias.</p>"
         + (forest(vrows, ref=hl, fmt="{:.0%}", tick_fmt="{:.0%}") if vrows else "")
         + "</section>"
@@ -674,7 +753,7 @@ def render_calibration_html(result: CalibrationResult, payload: dict[str, Any]) 
             cells += f"<div class='hd' style='text-align:right'>human {lab}</div>"
             for j, lab2 in enumerate(result.labels):
                 a = 0.08 + 0.82 * mat[i, j] / mx
-                ink = "#fff" if a > 0.5 else "var(--ink)"
+                ink = "#fff" if a > 0.5 else "var(--fg)"
                 cells += (
                     f"<div class='cell' style='background:rgba(var(--seq),{a:.2f});color:{ink}' "
                     f"data-tip='human {lab}, judge {lab2}: {mat[i, j]} pairs'>{mat[i, j]}</div>"
