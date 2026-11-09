@@ -1,0 +1,38 @@
+# Live demonstration of the gate on real, committed run artifacts (no API key needed):
+#  1. re-run of an unchanged prompt vs baseline  -> must PASS (no false alarm)
+#  2. the "simplified prompt" candidate vs baseline -> must FAIL (regression caught)
+# Uses the repository's own composite action, so this is also the action's integration test.
+name: Gate demo
+on:
+  push: {branches: [main]}
+  pull_request:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  no-false-alarm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        uses: ./
+        with:
+          baseline: examples/banking77/runs/baseline-v1
+          candidate: examples/banking77/runs/rerun-v1
+          comment: "false"
+      - run: test "${{ steps.gate.outputs.passed }}" = "true"
+
+  catches-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        uses: ./
+        continue-on-error: true  # the gate is expected to fail here; we assert that below
+        with:
+          baseline: examples/banking77/runs/baseline-v1
+          candidate: examples/banking77/runs/candidate-v2
+          comment: ${{ github.event_name == 'pull_request' }}
+      - run: test "${{ steps.gate.outcome }}" = "failure"
+      - uses: actions/upload-artifact@v4
+        with: {name: gate-report, path: "assaygate-*"}

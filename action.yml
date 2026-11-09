@@ -1,0 +1,65 @@
+name: assaygate
+description: Gate a pull request on LLM quality, $ cost and p95 latency against a baseline run, with bootstrap CIs; comments a summary on the PR.
+branding: {icon: check-circle, color: orange}
+inputs:
+  baseline:
+    description: Path to the baseline run folder (e.g. downloaded from the main branch's artifact).
+    required: true
+  candidate:
+    description: Path to the candidate run folder. If empty, `suite` is run to produce it.
+    required: false
+    default: ""
+  suite:
+    description: Suite YAML (used to run the candidate and for gate thresholds).
+    required: false
+    default: ""
+  comment:
+    description: Post (or update) a PR comment with the summary.
+    required: false
+    default: "true"
+outputs:
+  passed:
+    description: "'true' if every check passed."
+    value: ${{ steps.gate.outputs.passed }}
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v6
+      with: {python-version: "3.12"}
+    - name: Install assaygate
+      shell: bash
+      # Installs the exact version of this action (works for `uses: owner/assaygate@ref` and `./`).
+      run: uv tool install "${{ github.action_path }}"
+    - name: Run candidate suite
+      if: inputs.candidate == ''
+      shell: bash
+      run: assaygate run "${{ inputs.suite }}" --runs-dir .assaygate-runs --run-id candidate --label "${{ github.head_ref || github.ref_name }}"
+    - name: Gate
+      id: gate
+      shell: bash
+      run: |
+        CAND="${{ inputs.candidate }}"; [ -z "$CAND" ] && CAND=.assaygate-runs/candidate
+        SUITE_ARG=(); [ -n "${{ inputs.suite }}" ] && SUITE_ARG=(--suite "${{ inputs.suite }}")
+        set +e
+        assaygate compare "${{ inputs.baseline }}" "$CAND" "${SUITE_ARG[@]}" \
+          --markdown assaygate-summary.md --html assaygate-report.html --json assaygate-result.json
+        code=$?
+        set -e
+        echo "passed=$([ $code -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        echo "code=$code" >> "$GITHUB_OUTPUT"
+    - name: Comment on PR
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env: {GH_TOKEN: "${{ github.token }}"}
+      run: |
+        { echo "<!-- assaygate -->"; cat assaygate-summary.md; } > body.md
+        id=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+              --jq '.[] | select(.body | startswith("<!-- assaygate -->")) | .id' | head -1)
+        if [ -n "$id" ]; then gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$id" -F body=@body.md >/dev/null
+        else gh pr comment "${{ github.event.pull_request.number }}" --body-file body.md; fi
+    - name: Fail on regression
+      if: steps.gate.outputs.code != '0'
+      shell: bash
+      run: |
+        echo "::error::assaygate: regression detected (see summary / assaygate-report.html)"
+        exit 1

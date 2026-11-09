@@ -1,0 +1,32 @@
+# `docker compose up --build` brings up:
+#   assaygate     the report/gate service over the committed demo runs   http://localhost:8100
+#   classifier    the Banking77 demo app (system under test), prompt v1  http://localhost:8200
+# Then, to evaluate the running classifier from the host:
+#   BANKING77_URL=http://localhost:8200/classify uv run assaygate run examples/banking77/suite.yaml
+# The classifier needs ANTHROPIC_API_KEY in .env and the Banking77 splits (`make data`).
+services:
+  assaygate:
+    build: .
+    ports: ["8100:8100"]
+    volumes:
+      - ./examples/banking77/runs:/app/runs:ro
+    restart: unless-stopped
+
+  classifier:
+    build: .
+    command: ["uvicorn", "examples.banking77.app:app", "--host", "0.0.0.0", "--port", "8200"]
+    env_file: [.env]
+    environment:
+      PROMPT_VERSION: ${PROMPT_VERSION:-v1}
+      BANKING77_DATA: /app/data/banking77
+      ASSAYGATE_LEDGER: /app/data/spend.jsonl
+      ASSAYGATE_SPEND_CAP_USD: ${ASSAYGATE_SPEND_CAP_USD:-5.0}
+    ports: ["8200:8200"]
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8200/health').status==200 else 1)"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped

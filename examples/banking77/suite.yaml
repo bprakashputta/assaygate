@@ -1,0 +1,29 @@
+# Banking77 intent classifier, gated in CI.
+# The target is the FastAPI app in app.py; start it first (see README / docker compose).
+name: banking77-intents
+description: Banking77 test sample (300 utterances, 77 intents); exact-match accuracy, $ and p95 latency.
+dataset:
+  path: ../../data/banking77/${BANKING77_SPLIT:-test}.jsonl
+target:
+  type: http
+  url: ${BANKING77_URL:-http://localhost:8200/classify}
+  body: {text: "{{input}}"}
+  output_path: label
+  cost_path: cost_usd
+  timeout_s: 60
+scorers:
+  - type: exact
+    name: accuracy
+gate:
+  level: 0.95
+  quality:
+    - metric: accuracy
+      max_drop: 0.0          # any drop the CI is sure about fails the build
+  cost:
+    max_increase: 0.25       # fail if cost/item is confidently >25% higher
+  latency:
+    p95_max_increase: 0.30   # fail if p95 latency is confidently >30% higher
+execution:
+  concurrency: 3             # matches the app's in-flight cap, so latency is service time
+  ledger_path: ../../data/spend.jsonl
+  cache_path: null

@@ -1,0 +1,2 @@
+<!-- prompt: pairwise_reference v1 — appended when a reference answer is available. -->
+A reference answer written by a strong model is provided. Use it to check correctness: a response that reaches a different final answer than the reference on a math, reasoning or coding task is probably wrong, unless you can verify that the reference itself is mistaken. Do not reward a response merely for resembling the reference's wording.

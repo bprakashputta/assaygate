@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+data/
+.assaygate/
+runs/
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+.DS_Store
