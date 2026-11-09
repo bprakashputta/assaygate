@@ -1,0 +1,396 @@
+{
+  "passed": false,
+  "baseline_run": "baseline-v1",
+  "candidate_run": "candidate-v2",
+  "n_paired": 300,
+  "n_baseline_only": 0,
+  "n_candidate_only": 0,
+  "level": 0.95,
+  "checks": [
+    {
+      "name": "accuracy",
+      "kind": "quality",
+      "status": "fail",
+      "baseline": 0.8566666666666667,
+      "candidate": 0.7966666666666666,
+      "delta": -0.06,
+      "ci_low": -0.1,
+      "ci_high": -0.02,
+      "p_value": 0.004249787510624469,
+      "rule": "fail if CI high < -0",
+      "reason": "worse by 0.060 (CI excludes 0); 28 items lost, 10 gained (McNemar p=0.0051)"
+    },
+    {
+      "name": "cost_per_item_usd",
+      "kind": "cost",
+      "status": "pass",
+      "baseline": 0.00006128,
+      "candidate": 0.000031855000000000006,
+      "delta": 0.5198270234986947,
+      "ci_low": 0.5126903976003836,
+      "ci_high": 0.5302818918063668,
+      "p_value": null,
+      "rule": "fail if ratio CI low > 1.25",
+      "reason": "within budget"
+    },
+    {
+      "name": "latency_p95_ms",
+      "kind": "latency",
+      "status": "pass",
+      "baseline": 1147.9391395871062,
+      "candidate": 1070.8846646040913,
+      "delta": 0.9328758186512135,
+      "ci_low": 0.8637767411921022,
+      "ci_high": 1.0947717422187793,
+      "p_value": null,
+      "rule": "fail if p95 ratio CI low > 1.30",
+      "reason": "within budget"
+    }
+  ],
+  "regressions": [
+    {
+      "id": "test-0006",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "why_verify_identity",
+      "candidate_output": "verify_my_identity",
+      "expected": "why_verify_identity"
+    },
+    {
+      "id": "test-0026",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "virtual_card_not_working",
+      "candidate_output": "disposable_card_limits",
+      "expected": "virtual_card_not_working"
+    },
+    {
+      "id": "test-0030",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "exchange_via_app",
+      "candidate_output": "fiat_currency_support",
+      "expected": "exchange_via_app"
+    },
+    {
+      "id": "test-0037",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "declined_cash_withdrawal",
+      "candidate_output": "cash_withdrawal_not_recognised",
+      "expected": "declined_cash_withdrawal"
+    },
+    {
+      "id": "test-0043",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "order_physical_card",
+      "candidate_output": "get_physical_card",
+      "expected": "order_physical_card"
+    },
+    {
+      "id": "test-0048",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "get_physical_card",
+      "candidate_output": "change_pin",
+      "expected": "get_physical_card"
+    },
+    {
+      "id": "test-0054",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "transfer_into_account",
+      "candidate_output": "transfer_timing",
+      "expected": "transfer_into_account"
+    },
+    {
+      "id": "test-0076",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "compromised_card",
+      "candidate_output": "card_payment_not_recognised",
+      "expected": "compromised_card"
+    },
+    {
+      "id": "test-0086",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "getting_spare_card",
+      "candidate_output": "order_physical_card",
+      "expected": "getting_spare_card"
+    },
+    {
+      "id": "test-0095",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "getting_spare_card",
+      "candidate_output": "card_linking",
+      "expected": "getting_spare_card"
+    },
+    {
+      "id": "test-0099",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "order_physical_card",
+      "candidate_output": "get_physical_card",
+      "expected": "order_physical_card"
+    },
+    {
+      "id": "test-0104",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "pending_cash_withdrawal",
+      "candidate_output": "card_delivery_estimate",
+      "expected": "pending_cash_withdrawal"
+    },
+    {
+      "id": "test-0129",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "get_physical_card",
+      "candidate_output": "change_pin",
+      "expected": "get_physical_card"
+    },
+    {
+      "id": "test-0149",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "apple_pay_or_google_pay",
+      "candidate_output": "visa_or_mastercard",
+      "expected": "apple_pay_or_google_pay"
+    },
+    {
+      "id": "test-0168",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "verify_my_identity",
+      "candidate_output": "why_verify_identity",
+      "expected": "verify_my_identity"
+    },
+    {
+      "id": "test-0190",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "get_physical_card",
+      "candidate_output": "change_pin",
+      "expected": "get_physical_card"
+    },
+    {
+      "id": "test-0205",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "cancel_transfer",
+      "candidate_output": "request_refund",
+      "expected": "cancel_transfer"
+    },
+    {
+      "id": "test-0232",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "card_linking",
+      "candidate_output": "activate_my_card",
+      "expected": "card_linking"
+    },
+    {
+      "id": "test-0236",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "supported_cards_and_currencies",
+      "candidate_output": "fiat_currency_support",
+      "expected": "supported_cards_and_currencies"
+    },
+    {
+      "id": "test-0239",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "apple_pay_or_google_pay",
+      "candidate_output": "top_up_failed",
+      "expected": "apple_pay_or_google_pay"
+    },
+    {
+      "id": "test-0242",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "top_up_failed",
+      "candidate_output": "declined_card_payment",
+      "expected": "top_up_failed"
+    },
+    {
+      "id": "test-0243",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "card_arrival",
+      "candidate_output": "card_delivery_estimate",
+      "expected": "card_arrival"
+    },
+    {
+      "id": "test-0249",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "wrong_amount_of_cash_received",
+      "candidate_output": "cash_withdrawal_not_recognised",
+      "expected": "wrong_amount_of_cash_received"
+    },
+    {
+      "id": "test-0264",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "get_physical_card",
+      "candidate_output": "change_pin",
+      "expected": "get_physical_card"
+    },
+    {
+      "id": "test-0266",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "get_physical_card",
+      "candidate_output": "change_pin",
+      "expected": "get_physical_card"
+    },
+    {
+      "id": "test-0275",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "pending_card_payment",
+      "candidate_output": "pending_transfer",
+      "expected": "pending_card_payment"
+    },
+    {
+      "id": "test-0285",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "get_physical_card",
+      "candidate_output": "change_pin",
+      "expected": "get_physical_card"
+    },
+    {
+      "id": "test-0290",
+      "metric": "accuracy",
+      "baseline": 1.0,
+      "candidate": 0.0,
+      "baseline_output": "virtual_card_not_working",
+      "candidate_output": "declined_card_payment",
+      "expected": "virtual_card_not_working"
+    }
+  ],
+  "improvements": [
+    {
+      "id": "test-0015",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "supported_cards_and_currencies",
+      "candidate_output": "fiat_currency_support",
+      "expected": "fiat_currency_support"
+    },
+    {
+      "id": "test-0044",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "card_acceptance",
+      "candidate_output": "country_support",
+      "expected": "country_support"
+    },
+    {
+      "id": "test-0049",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "unable_to_verify_identity",
+      "candidate_output": "why_verify_identity",
+      "expected": "why_verify_identity"
+    },
+    {
+      "id": "test-0066",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "country_support",
+      "candidate_output": "contactless_not_working",
+      "expected": "contactless_not_working"
+    },
+    {
+      "id": "test-0068",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "card_not_working",
+      "candidate_output": "declined_card_payment",
+      "expected": "declined_card_payment"
+    },
+    {
+      "id": "test-0107",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "card_payment_not_recognised",
+      "candidate_output": "transaction_charged_twice",
+      "expected": "transaction_charged_twice"
+    },
+    {
+      "id": "test-0164",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "top_up_failed",
+      "candidate_output": "balance_not_updated_after_cheque_or_cash_deposit",
+      "expected": "balance_not_updated_after_cheque_or_cash_deposit"
+    },
+    {
+      "id": "test-0182",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "order_physical_card",
+      "candidate_output": "country_support",
+      "expected": "country_support"
+    },
+    {
+      "id": "test-0231",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "balance_not_updated_after_bank_transfer",
+      "candidate_output": "balance_not_updated_after_cheque_or_cash_deposit",
+      "expected": "balance_not_updated_after_cheque_or_cash_deposit"
+    },
+    {
+      "id": "test-0233",
+      "metric": "accuracy",
+      "baseline": 0.0,
+      "candidate": 1.0,
+      "baseline_output": "top_up_failed",
+      "candidate_output": "pending_top_up",
+      "expected": "pending_top_up"
+    }
+  ]
+}

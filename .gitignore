@@ -3,7 +3,7 @@
 !.env.example
 data/
 .assaygate/
-runs/
+/runs/
 __pycache__/
 *.pyc
 .venv/

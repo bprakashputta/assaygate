@@ -1,0 +1,41 @@
+{
+  "run_id": "candidate-v2",
+  "suite": "banking77-intents",
+  "label": "PR: simplified prompt (v2)",
+  "created_at": "2026-11-09T05:37:46+00:00",
+  "duration_s": 80.342,
+  "n_items": 300,
+  "n_errors": 0,
+  "metrics": [
+    "accuracy"
+  ],
+  "config_sha256": "0ee3fb9b0c283c63395f09f75d7bf0ebd983904a167588568a1bd832b1a2ed6b",
+  "dataset_sha256": "49b1b04cf8391d3e9f32d2812b70510c0948240b46ca8d950ea351bf3030e05f",
+  "git_sha": null,
+  "totals": {
+    "system_cost_usd": 0.009557,
+    "eval_cost_usd": 0.0,
+    "mean_accuracy": 0.796667
+  },
+  "gate": {
+    "level": 0.95,
+    "n_resamples": 10000,
+    "seed": 0,
+    "quality": [
+      {
+        "metric": "accuracy",
+        "max_drop": 0.0,
+        "mode": "regression",
+        "min_value": null
+      }
+    ],
+    "cost": {
+      "max_increase": 0.25,
+      "max_per_item_usd": null
+    },
+    "latency": {
+      "p95_max_increase": 0.3,
+      "p95_max_ms": null
+    }
+  }
+}

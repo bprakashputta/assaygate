@@ -61,5 +61,9 @@ runs:
       if: steps.gate.outputs.code != '0'
       shell: bash
       run: |
-        echo "::error::assaygate: regression detected (see summary / assaygate-report.html)"
+        if [ "${{ steps.gate.outputs.code }}" = "1" ]; then
+          echo "::error::assaygate: regression detected (see summary / assaygate-report.html)"
+        else
+          echo "::error::assaygate failed to run (exit ${{ steps.gate.outputs.code }})"
+        fi
         exit 1
