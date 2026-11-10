@@ -24,7 +24,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: astral-sh/setup-uv@v6
+    - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6.8.0
       with: {python-version: "3.12"}
     - name: Install assaygate
       shell: bash
@@ -33,15 +33,23 @@ runs:
     - name: Run candidate suite
       if: inputs.candidate == ''
       shell: bash
-      run: assaygate run "${{ inputs.suite }}" --runs-dir .assaygate-runs --run-id candidate --label "${{ github.head_ref || github.ref_name }}"
+      # Untrusted values (inputs, branch names) reach the shell only via env, never via ${{ }} in the script.
+      env:
+        SUITE: ${{ inputs.suite }}
+        LABEL: ${{ github.head_ref || github.ref_name }}
+      run: assaygate run "$SUITE" --runs-dir .assaygate-runs --run-id candidate --label "$LABEL"
     - name: Gate
       id: gate
       shell: bash
+      env:
+        BASELINE: ${{ inputs.baseline }}
+        CANDIDATE: ${{ inputs.candidate }}
+        SUITE: ${{ inputs.suite }}
       run: |
-        CAND="${{ inputs.candidate }}"; [ -z "$CAND" ] && CAND=.assaygate-runs/candidate
-        SUITE_ARG=(); [ -n "${{ inputs.suite }}" ] && SUITE_ARG=(--suite "${{ inputs.suite }}")
+        CAND="$CANDIDATE"; [ -z "$CAND" ] && CAND=.assaygate-runs/candidate
+        SUITE_ARG=(); [ -n "$SUITE" ] && SUITE_ARG=(--suite "$SUITE")
         set +e
-        assaygate compare "${{ inputs.baseline }}" "$CAND" "${SUITE_ARG[@]}" \
+        assaygate compare "$BASELINE" "$CAND" "${SUITE_ARG[@]}" \
           --markdown assaygate-summary.md --html assaygate-report.html --json assaygate-result.json
         code=$?
         set -e
@@ -50,20 +58,24 @@ runs:
     - name: Comment on PR
       if: inputs.comment == 'true' && github.event_name == 'pull_request'
       shell: bash
-      env: {GH_TOKEN: "${{ github.token }}"}
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        PR: ${{ github.event.pull_request.number }}
       run: |
         { echo "<!-- assaygate -->"; cat assaygate-summary.md; } > body.md
-        id=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+        id=$(gh api "repos/$REPO/issues/$PR/comments" \
               --jq '.[] | select(.body | startswith("<!-- assaygate -->")) | .id' | head -1)
-        if [ -n "$id" ]; then gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$id" -F body=@body.md >/dev/null
-        else gh pr comment "${{ github.event.pull_request.number }}" --body-file body.md; fi
+        if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@body.md >/dev/null
+        else gh pr comment "$PR" --body-file body.md; fi
     - name: Fail on regression
       if: steps.gate.outputs.code != '0'
       shell: bash
+      env: {CODE: "${{ steps.gate.outputs.code }}"}
       run: |
-        if [ "${{ steps.gate.outputs.code }}" = "1" ]; then
+        if [ "$CODE" = "1" ]; then
           echo "::error::assaygate: regression detected (see summary / assaygate-report.html)"
         else
-          echo "::error::assaygate failed to run (exit ${{ steps.gate.outputs.code }})"
+          echo "::error::assaygate failed to run (exit $CODE)"
         fi
         exit 1

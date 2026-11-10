@@ -99,7 +99,7 @@ From Python: `await assaygate.run_suite(load_suite("suite.yaml"))`, `assaygate.c
 ### In CI
 
 ```yaml
-- uses: bprakashputta/assaygate@main
+- uses: bprakashputta/assaygate@v1
   with: {baseline: baseline, suite: evals/suite.yaml}   # baseline = main's run, as an artifact
   env: {ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}"}
 ```
