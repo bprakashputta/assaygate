@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: uv tool install git+https://github.com/bprakashputta/assaygate@main
+      - run: uv tool install git+https://github.com/bprakashputta/assaygate@v1
       - run: assaygate run evals/suite.yaml --runs-dir runs --run-id baseline --label main
         env: {ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}"}
       - uses: actions/upload-artifact@v4
@@ -28,6 +28,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dawidd6/action-download-artifact@v6
         with: {name: assaygate-baseline, branch: main, workflow: llm-gate.yml, path: baseline}
-      - uses: bprakashputta/assaygate@main
+      - uses: bprakashputta/assaygate@v1
         with: {baseline: baseline, suite: evals/suite.yaml}
         env: {ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}"}
